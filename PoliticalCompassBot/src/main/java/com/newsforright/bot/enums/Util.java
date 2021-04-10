@@ -1,8 +1,10 @@
 package com.newsforright.bot.enums;
 
-public enum Util {
+public enum Util implements Button{
     LETSGO("Поїхали!"),
-    BACK("Назад")
+    BACK("Назад"),
+    RESTART("Пройти заново"),
+    NULL("")
     ;
 
     private final String text;
@@ -13,5 +15,10 @@ public enum Util {
 
     public String getText() {
         return this.text;
+    }
+
+    @Override
+    public String getButtonType() {
+        return "UTIL";
     }
 }

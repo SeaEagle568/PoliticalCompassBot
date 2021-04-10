@@ -3,7 +3,7 @@ package com.newsforright.bot.persistence;
 import com.newsforright.bot.entities.BotState;
 import com.newsforright.bot.entities.Question;
 import com.newsforright.bot.entities.TelegramUser;
-import com.newsforright.bot.service.TelegramOutputService;
+import com.newsforright.bot.enums.Phase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -14,10 +14,6 @@ public class DBManager {
     private TelegramUserRepository userRepository;
     private BotStateRepository botStateRepository;
     private QuestionRepository questionRepository;
-
-    //TODO: DELETE THIS!!
-    @Autowired
-    private TelegramOutputService output;
 
     @Autowired
     public void setUserRepository(TelegramUserRepository userRepository) {
@@ -40,6 +36,7 @@ public class DBManager {
     }
 
     public void saveUser(TelegramUser user){
+        saveState(user.getBotState());
         userRepository.save(user);
     }
     public void saveQuestions(List<Question> question){
@@ -48,5 +45,18 @@ public class DBManager {
     public void saveState(BotState state){
         botStateRepository.save(state);
     }
+
+    public void nextPhase(BotState state){
+        switch (state.getPhase()) {
+            case PRESTART, RESULTS -> state.setPhase(Phase.GREETING);
+            case GREETING -> state.setPhase(Phase.TESTING);
+            case TESTING -> state.setPhase(Phase.SOCIAL);
+            case SOCIAL -> state.setPhase(Phase.RESULTS);
+        }
+        saveState(state);
+
+    }
+
+
 
 }

@@ -46,9 +46,10 @@ public class BotState {
     @Getter @Setter
     private Phase phase;
 
-    @Column(name="question_number", nullable = false)
+    @OneToOne
+    @JoinColumn(name = "question_number", referencedColumnName = "id")
     @Getter @Setter
-    private Long questionNumber;
+    private Question currentQuestion;
 
     @Column(
             name="last_answer",
@@ -59,20 +60,22 @@ public class BotState {
     private String lastAnswer;
 
     @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     @Getter @Setter
     private TelegramUser user;
 
-    public BotState(Phase phase, Long questionNumber, String lastAnswer, TelegramUser user) {
+    public BotState(Phase phase, Question currentQuestion, String lastAnswer, TelegramUser user) {
         this.phase = phase;
-        this.questionNumber = questionNumber;
+        this.currentQuestion = currentQuestion;
         this.lastAnswer = lastAnswer;
         this.user = user;
     }
 
-    public BotState(String lastAnswer, TelegramUser user) {
+
+    public BotState(String lastAnswer, TelegramUser user, Question firstQuestion) {
         this.lastAnswer = lastAnswer;
         this.user = user;
         this.phase = Phase.PRESTART;
-        this.questionNumber = 0L;
+        this.currentQuestion = firstQuestion;
     }
 }

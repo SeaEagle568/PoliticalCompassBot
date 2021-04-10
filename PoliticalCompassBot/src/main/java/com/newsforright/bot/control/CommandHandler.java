@@ -5,6 +5,7 @@ import com.newsforright.bot.entities.TelegramUser;
 import com.newsforright.bot.enums.Phase;
 import com.newsforright.bot.persistence.DBManager;
 import com.newsforright.bot.service.TelegramOutputService;
+import com.newsforright.bot.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -27,18 +28,20 @@ public class CommandHandler {
         this.output = output;
     }
 
-    public void parseMessage(String message, TelegramUser currentUser, BotState state) {
+    public void parseMessage(String message, TelegramUser currentUser) {
         if (isStartCommand(message)){
-            startGreeting(currentUser, state);
+            startGreeting(currentUser, currentUser.getBotState());
+        }
+        else if (message.equals("/test")){
+            //TODO: Delete this after test
+            output.sendResults(currentUser.getChatId(), new Pair<Double, Double>(75d, 75d));
         }
     }
 
     private void startGreeting(TelegramUser currentUser, BotState state) {
         if (state.getPhase() != Phase.PRESTART) return;
-
         output.printGreeting(currentUser.getChatId());
-        state.setPhase(Phase.GREETING);
-        dbManager.saveState(state);
+        dbManager.nextPhase(currentUser.getBotState());
     }
 
     private boolean isStartCommand(String message) {

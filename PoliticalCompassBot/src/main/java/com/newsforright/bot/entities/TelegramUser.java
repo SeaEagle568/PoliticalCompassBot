@@ -1,12 +1,16 @@
 package com.newsforright.bot.entities;
 
+import com.vladmihalcea.hibernate.type.array.ListArrayType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
 import org.springframework.context.annotation.Scope;
 
 import javax.persistence.*;
+import java.util.List;
 
 import static javax.persistence.GenerationType.SEQUENCE;
 
@@ -19,6 +23,10 @@ import static javax.persistence.GenerationType.SEQUENCE;
 )
 @ToString
 @NoArgsConstructor
+@TypeDef(
+        name = "list-array",
+        typeClass = ListArrayType.class
+)
 @Scope(value = "prototype")
 public class TelegramUser {
 
@@ -85,12 +93,17 @@ public class TelegramUser {
 
 
     @OneToOne
+    @JoinColumn(name = "bot_state_id", referencedColumnName = "id")
     @Getter @Setter
     private BotState botState;
 
-    @Column(name="additional_data_id")
+    @Column(
+            name="answer_list",
+            columnDefinition = "integer[]"
+    )
+    @Type(type="list-array")
     @Getter @Setter
-    private Long additionalDataId;
+    private List<Integer> answers;
 
     public TelegramUser(String name,
                         String username,
@@ -99,7 +112,7 @@ public class TelegramUser {
                         String result,
                         Long socialDataId,
                         BotState botState,
-                        Long additionalDataId) {
+                        List<Integer> answers) {
 
         this.name = name;
         this.username = username;
@@ -108,6 +121,6 @@ public class TelegramUser {
         this.result = result;
         this.socialDataId = socialDataId;
         this.botState = botState;
-        this.additionalDataId = additionalDataId;
+        this.answers = answers;
     }
 }

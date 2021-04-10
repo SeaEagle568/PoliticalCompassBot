@@ -4,11 +4,15 @@ import com.newsforright.bot.entities.BotState;
 import com.newsforright.bot.entities.TelegramUser;
 import com.newsforright.bot.persistence.DBManager;
 import com.newsforright.bot.service.TelegramOutputService;
+import com.newsforright.bot.util.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
+import java.util.ArrayList;
 
 @Service
 public class MainController {
@@ -18,7 +22,18 @@ public class MainController {
     private CommandHandler commandHandler;
     private TelegramOutputService output;
     private DBManager dbManager;
+    private CommonUtils utils;
 
+    @Autowired
+    public void setUtils(CommonUtils utils) {
+        this.utils = utils;
+    }
+
+    @Value("${bot.resources.questions}")
+    private String questionsFile;
+
+
+    @Autowired
     public TelegramOutputService getOutput() {
         return output;
     }
@@ -51,16 +66,17 @@ public class MainController {
         TelegramUser currentUser = getUser(chat, message.getText());
         BotState state = currentUser.getBotState();
         if (message.isCommand()) {
-            commandHandler.parseMessage(message.getText(), currentUser, state);
+            commandHandler.parseMessage(message.getText(), currentUser);
         }
         else {
-            answerHandler.parseMessage(message.getText(), currentUser, state);
+            answerHandler.parseMessage(message.getText(), currentUser);
         }
 
 
 
 
     }
+
 
     private boolean isText(Message message) {
         return message.hasText();
@@ -76,17 +92,20 @@ public class MainController {
             state = user.getBotState();
         }
         else {
-            state = new BotState(message, null);
+            assert utils.questionList.get(0) != null;
+
+            state = new BotState(message, null, utils.questionList.get(0));
             dbManager.saveState(state);
 
             user = new TelegramUser(chat.getFirstName() + " " + chat.getLastName(),
                     chat.getUserName(),
                     chatId,
                     null,
-                    null,
+                    "0,0",
                     null,
                     state,
-                    null);
+                    new ArrayList<Integer>(utils.getEmptyList())
+            );
 
             dbManager.saveUser(user);
 
@@ -97,4 +116,5 @@ public class MainController {
         return user;
 
     }
+
 }

@@ -13,6 +13,7 @@ public class PoliticalCompassBot {
 
         SpringApplication.run(PoliticalCompassBot.class, args);
     }
+
     @Bean
     public ObjectMapper objectMapper(){
         return new ObjectMapper();
@@ -24,4 +25,5 @@ public class PoliticalCompassBot {
 
         };
     }
+
 }
