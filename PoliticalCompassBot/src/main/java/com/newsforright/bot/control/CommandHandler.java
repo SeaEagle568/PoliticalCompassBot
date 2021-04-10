@@ -5,11 +5,15 @@ import com.newsforright.bot.entities.TelegramUser;
 import com.newsforright.bot.enums.Phase;
 import com.newsforright.bot.persistence.DBManager;
 import com.newsforright.bot.service.TelegramOutputService;
-import com.newsforright.bot.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+/**
+ * Little handler that deals with telegram commands
+ *
+ * @author seaeagle
+ */
 @Service
 public class CommandHandler {
 
@@ -28,22 +32,34 @@ public class CommandHandler {
         this.output = output;
     }
 
+    /**
+     * Method called by MainController
+     * Now only checks /start
+     * @param message String input message
+     * @param currentUser Telegram user who send message
+     */
     public void parseMessage(String message, TelegramUser currentUser) {
         if (isStartCommand(message)){
             startGreeting(currentUser, currentUser.getBotState());
         }
-        else if (message.equals("/test")){
-            //TODO: Delete this after test
-            output.sendResults(currentUser.getChatId(), new Pair<Double, Double>(75d, 75d));
-        }
     }
 
+    /**
+     * Only if user on PRESTART sends greetings
+     * @param currentUser Telegram user who send message
+     * @param state IoC user.getBotState()
+     */
     private void startGreeting(TelegramUser currentUser, BotState state) {
         if (state.getPhase() != Phase.PRESTART) return;
         output.printGreeting(currentUser.getChatId());
         dbManager.nextPhase(currentUser.getBotState());
     }
 
+    /**
+     * Checks if input is /start or /start@bot
+     * @param message String input message
+     * @return Boolean answer
+     */
     private boolean isStartCommand(String message) {
         return  (message.equalsIgnoreCase("/start")
                 || message.equalsIgnoreCase("/start@" + botUsername));

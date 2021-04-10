@@ -12,9 +12,13 @@ import com.newsforright.bot.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * Handler class that is responsible for button answers
+ *
+ * @author seaeagle
+ */
 @Service
 public class AnswerHandler {
-    //TODO: code review
 
     private TelegramOutputService output;
     private DBManager dbManager;
@@ -25,22 +29,24 @@ public class AnswerHandler {
     public void setUtils(CommonUtils utils) {
         this.utils = utils;
     }
-
     @Autowired
     public void setQuizController(QuizController quizController) {
         this.quizController = quizController;
     }
-
     @Autowired
     public void setDbManager(DBManager dbManager) {
         this.dbManager = dbManager;
     }
-
     @Autowired
     public void setOutput(TelegramOutputService output) {
         this.output = output;
     }
 
+    /**
+     * Parsing message method called from MainController
+     * @param message String input message
+     * @param currentUser Telegram user who send message
+     */
     public void parseMessage(String message, TelegramUser currentUser) {
         switch (currentUser.getBotState().getPhase()) {
             case GREETING -> greetingAnswer(message, currentUser);
@@ -50,46 +56,22 @@ public class AnswerHandler {
 
     }
 
-    private void restartTest(String message, TelegramUser currentUser) {
-        Button button = Button.getButton(message);
-        if (!message.equals(Util.RESTART.getText())) return;
-
-        output.printGreeting(currentUser.getChatId());
-        dbManager.nextPhase(currentUser.getBotState());
+    /**
+     * Starts test if users clicks LETSGO
+     * @param message String input message
+     * @param currentUser Telegram user who send message
+     */
+    private void greetingAnswer(String message, TelegramUser currentUser) {
+        if (!message.equals(Util.LETSGO.getText())) return;
+        startTest(currentUser);
     }
 
-    private void goBack(TelegramUser currentUser){
-        Question currentQuestion = currentUser.getBotState().getCurrentQuestion();
-        Integer value = currentUser.getAnswers().get((int) (currentQuestion.getNumber()-2));
-        updateResults(currentUser, -value);
-        quizController.askPrevious(currentUser);
-    }
-
-    private void goForward(Answer button, TelegramUser currentUser){
-        Question currentQuestion = currentUser.getBotState().getCurrentQuestion();
-        Integer buttonValue = button.getValue(currentQuestion.getInverted());
-        updateResults(currentUser, buttonValue);
-        currentUser.getAnswers().set((int) (currentQuestion.getNumber()-1), buttonValue);
-        if (currentQuestion.getNumber().equals(utils.LAST_QUESTION)) {
-            quizController.showResults(currentUser);
-            dbManager.nextPhase(currentUser.getBotState());
-            //TODO: DELETE THIS WHEN SOCIAL IMPLEMENTED!!!
-            dbManager.nextPhase(currentUser.getBotState());
-        }
-        else quizController.askNext(currentUser);
-    }
-
-    private void updateResults(TelegramUser currentUser, Integer value){
-        Pair<Integer, Integer> currentResults = utils.parseResults(currentUser.getResult());
-        Question currentQuestion = currentUser.getBotState().getCurrentQuestion();
-        switch (currentQuestion.getAxe()) {
-            case ECONOMICAL -> currentResults.setFirst(currentResults.getFirst() + value);
-            case POLITICAL -> currentResults.setSecond(currentResults.getSecond() + value);
-        }
-        currentUser.setResult(utils.resultsToString(currentResults));
-
-    }
-
+    /**
+     * Method that understands what button while test was clicked
+     * And recounts result delegating the other to QuizController
+     * @param message String input message
+     * @param currentUser Telegram user who send message
+     */
     private void handleQuizAnswer(String message, TelegramUser currentUser) {
         Button button = Button.getButton(message);
 
@@ -98,20 +80,83 @@ public class AnswerHandler {
             goBack(currentUser);
             return;
         }
-        //No button found, random text
+        //No button found, random text -> ignore
         if (button.getButtonType().equals("UTIL")) return;
+
+        //Else go to next question
         goForward((Answer) button, currentUser);
     }
 
-    private void greetingAnswer(String message, TelegramUser currentUser) {
-        if (!message.equals(Util.LETSGO.getText())) return;
-        startTest(currentUser);
+    /**
+     * If user on RESULTS phase and clicked on RESTART
+     * We send greetings again
+     * @param message String input message
+     * @param currentUser Telegram user who send message
+     */
+    private void restartTest(String message, TelegramUser currentUser) {
+        if (!message.equals(Util.RESTART.getText())) return;
+
+        output.printGreeting(currentUser.getChatId());
+        dbManager.nextPhase(currentUser.getBotState());
     }
 
+    /**
+     * Annihilates results from last question, then asks quizController to do something
+     * @param currentUser Telegram user who send message
+     */
+    private void goBack(TelegramUser currentUser){
+        int questionNumber = Math.toIntExact(currentUser.getBotState().getCurrentQuestion().getNumber());
+        //We need -2 because current question is the one that on the screen, left unanswered
+        Integer value = currentUser.getAnswers().get(questionNumber - 2);
+        updateResults(currentUser, -value); //subtracting
+        quizController.askPrevious(currentUser);
+    }
+
+    /**
+     * Counts results and goes to next question
+     * @param button Answer button that was pressed
+     * @param currentUser Telegram user who send message
+     */
+    private void goForward(Answer button, TelegramUser currentUser){
+        int questionNumber = Math.toIntExact(currentUser.getBotState().getCurrentQuestion().getNumber());
+        boolean inverted = currentUser.getBotState().getCurrentQuestion().getInverted();
+
+        Integer buttonValue = button.getValue(inverted);
+        updateResults(currentUser, buttonValue);
+        currentUser.getAnswers().set(questionNumber-1, buttonValue);
+
+        if (questionNumber == utils.LAST_QUESTION.intValue()) { //if last show results
+            quizController.showResults(currentUser);
+            dbManager.nextPhase(currentUser.getBotState());
+            //TODO: DELETE THIS WHEN SOCIAL IMPLEMENTED!!!
+            dbManager.nextPhase(currentUser.getBotState());
+        }
+        else quizController.askNext(currentUser); //else go next
+    }
+
+    /**
+     * Auxiliary method to count and update result field in TelegramUser
+     * @param currentUser Telegram user who send message
+     * @param value Value that we ADD to result
+     */
+    private void updateResults(TelegramUser currentUser, Integer value){
+        Pair<Integer, Integer> currentResults = utils.parseResults(currentUser.getResult());
+        Question currentQuestion = currentUser.getBotState().getCurrentQuestion();
+        switch (currentQuestion.getAxe()) {
+            case ECONOMICAL -> currentResults.first += value;
+            case POLITICAL -> currentResults.second += value;
+        }
+        currentUser.setResult(utils.resultsToString(currentResults));
+
+    }
+
+    /**
+     * Changing phase and throwing all work to QuizController
+     * @param currentUser Telegram user who send message
+     */
     private void startTest(TelegramUser currentUser) {
         dbManager.nextPhase(currentUser.getBotState());
         quizController.startQuiz(currentUser);
     }
-
 
 }

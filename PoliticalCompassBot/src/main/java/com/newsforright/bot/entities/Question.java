@@ -9,18 +9,24 @@ import org.springframework.context.annotation.Scope;
 
 import javax.persistence.*;
 
+/**
+ * Entity class representing questions table
+ * It has tons of those nasty annotations that I dont even understand
+ *
+ * @author seaeagle
+ */
 @Entity(name="Question")
 @Table(
         name="questions",
-        uniqueConstraints = {
+        uniqueConstraints = { //making columns unique
                 @UniqueConstraint(name = "question_text_unique", columnNames = "text"),
                 @UniqueConstraint(name = "question_number_unique", columnNames = "number"),
                 @UniqueConstraint(name = "question_id_unique", columnNames = "id")
         }
 )
+@Scope(value = "prototype")
 @ToString
 @NoArgsConstructor
-@Scope(value = "prototype")
 public class Question {
 
     @Id

@@ -11,16 +11,17 @@ import javax.persistence.*;
 
 import static javax.persistence.GenerationType.SEQUENCE;
 
+/**
+ * Entity class representing bot_states table
+ * It has tons of those nasty annotations that I dont even understand
+ *
+ * @author seaeagle
+ */
 @Entity(name="BotState")
-@Table(
-        name="bot_states",
-        uniqueConstraints = {
-                @UniqueConstraint(name = "botstate_userid_unique", columnNames = "user_id")
-        }
-)
+@Table(name="bot_states")
+@Scope(value = "prototype") //Idk singleton or prototype what to choose
 @NoArgsConstructor
 @ToString
-@Scope(value = "prototype")
 public class BotState {
 
     @SequenceGenerator(
@@ -63,14 +64,6 @@ public class BotState {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @Getter @Setter
     private TelegramUser user;
-
-    public BotState(Phase phase, Question currentQuestion, String lastAnswer, TelegramUser user) {
-        this.phase = phase;
-        this.currentQuestion = currentQuestion;
-        this.lastAnswer = lastAnswer;
-        this.user = user;
-    }
-
 
     public BotState(String lastAnswer, TelegramUser user, Question firstQuestion) {
         this.lastAnswer = lastAnswer;

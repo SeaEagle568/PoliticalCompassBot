@@ -14,20 +14,26 @@ import java.util.List;
 
 import static javax.persistence.GenerationType.SEQUENCE;
 
+/**
+ * Entity class representing telegram_users table
+ * It has tons of those nasty annotations that I dont even understand
+ *
+ * @author seaeagle
+ */
 @Entity(name="TelegramUser")
 @Table(
         name="telegram_users",
-        uniqueConstraints = {
+        uniqueConstraints = { //It says that chat_id column should be unique
                 @UniqueConstraint(name = "users_chatid_unique", columnNames = "chat_id")
         }
 )
-@ToString
-@NoArgsConstructor
 @TypeDef(
-        name = "list-array",
+        name = "list-array",  //This kek allows to use Lists in DB (based)
         typeClass = ListArrayType.class
 )
-@Scope(value = "prototype")
+@Scope(value = "prototype") //Do i really need prototype?
+@ToString
+@NoArgsConstructor
 public class TelegramUser {
 
     @SequenceGenerator(
@@ -78,18 +84,18 @@ public class TelegramUser {
             columnDefinition = "TEXT"
     )
     @Getter @Setter
-    private String email;
+    private String email; //Why is it here?
 
     @Column(
             name="result",
             columnDefinition = "TEXT"
     )
     @Getter @Setter
-    private String result;
+    private String result; //Format is '(a,b)'
 
     @Column(name="social_data_id")
     @Getter @Setter
-    private Long socialDataId;
+    private Long socialDataId; //TODO: Change this to @OneToOne relation
 
 
     @OneToOne
@@ -105,6 +111,7 @@ public class TelegramUser {
     @Getter @Setter
     private List<Integer> answers;
 
+    //If only Lombok had @SomeArgsConstructor......
     public TelegramUser(String name,
                         String username,
                         String chatId,

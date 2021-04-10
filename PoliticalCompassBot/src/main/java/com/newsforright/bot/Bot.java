@@ -9,6 +9,12 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import javax.annotation.PostConstruct;
 
+/**
+ * Telegram Long Polling bot class.
+ * Registers in Telegram, delegates all updates to MainController
+ *
+ * @author seaeagle
+ */
 @Component
 public class Bot extends TelegramLongPollingBot {
 
@@ -23,6 +29,13 @@ public class Bot extends TelegramLongPollingBot {
     @Autowired
     public void setController(MainController controller) {
         this.controller = controller;
+    }
+
+    @PostConstruct
+    private void OnStart(){
+        System.out.println("[" + java.time.LocalDateTime.now() + "]"
+                + " Bot successfully started"
+        );
     }
 
     @Override
@@ -40,10 +53,5 @@ public class Bot extends TelegramLongPollingBot {
         return botToken;
     }
 
-    @PostConstruct
-    private void OnStart(){
-        System.out.println("[" + java.time.LocalDateTime.now() + "]"
-                + " Bot successfully started"
-        );
-    }
+
 }
