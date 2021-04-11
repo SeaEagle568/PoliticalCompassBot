@@ -1,11 +1,13 @@
 package com.newsforright.bot.service;
 
 import com.newsforright.bot.Bot;
+import com.newsforright.bot.entities.TelegramUser;
 import com.newsforright.bot.enums.Answer;
 import com.newsforright.bot.enums.Button;
 import com.newsforright.bot.enums.Util;
 import com.newsforright.bot.util.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
@@ -30,6 +32,10 @@ import java.util.List;
  */
 @Service
 public class TelegramOutputService {
+
+    @Value("${bot.resources.social-url}")
+    private String googleFormUrl;
+
     //dependencies
     private Bot bot;
     private CommonUtils utils;
@@ -94,7 +100,24 @@ public class TelegramOutputService {
             e.printStackTrace();
             utils.printErrorToDev("Error sending file"); //TODO: delete on release
         }
+        assert (image.delete());
     }
+
+    /**
+     * A method to send google form and ask to complete it
+     * @param currentUser Telegram user that send a message
+     */
+    public void askGoogleForm(TelegramUser currentUser) {
+        printWithMarkup(googleFormUrl + currentUser.getSocialDataId(), //form
+                currentUser.getChatId(),
+                requestResultsKeyboard());
+
+        printWithMarkup("Просимо вас, заповнити цю форму.\n" + //request
+                "Ми не передаємо ваші дані третім особам та не використовуємо їх в комерційних цілях",
+                currentUser.getChatId(),
+                requestResultsKeyboard());
+    }
+
 
     /**
      * Simple method to print some text with buttons to user
@@ -114,16 +137,31 @@ public class TelegramOutputService {
         }
     }
 
-    /**
-     * Simple method that creates one button markup
-     * Used with greeting
-     * @return KeyboardMarkup with one Util.LETSGO button
-     */
     private ReplyKeyboardMarkup startQuizMarkup() {
         ReplyKeyboardMarkup result = new ReplyKeyboardMarkup();
         result.setKeyboard(
                 List.of(
                         oneButtonRow(Util.LETSGO)
+                )
+        );
+        return result;
+    }
+
+    private ReplyKeyboard requestResultsKeyboard() {
+        ReplyKeyboardMarkup result = new ReplyKeyboardMarkup();
+        result.setKeyboard(
+                List.of(
+                        oneButtonRow(Util.RESULTS)
+                )
+        );
+        return result;
+    }
+
+    private ReplyKeyboardMarkup resultsKeyboard() {
+        ReplyKeyboardMarkup result = new ReplyKeyboardMarkup();
+        result.setKeyboard(
+                List.of(
+                        oneButtonRow(Util.RESTART)
                 )
         );
         return result;
@@ -143,19 +181,7 @@ public class TelegramOutputService {
         );
     }
 
-    /**
-     * Simple method that generates one button Keyboard for RESULTS phase
-     * @return keyboard markup with one Utils.RESTART button
-     */
-    private ReplyKeyboardMarkup resultsKeyboard() {
-        ReplyKeyboardMarkup result = new ReplyKeyboardMarkup();
-        result.setKeyboard(
-                List.of(
-                    oneButtonRow(Util.RESTART)
-                )
-        );
-        return result;
-    }
+
 
     /**
      * Simple method that converts list of standard quiz buttons to KeyboardMarkup
@@ -184,7 +210,5 @@ public class TelegramOutputService {
         result.add(button.getText());
         return result;
     }
-
-
 
 }

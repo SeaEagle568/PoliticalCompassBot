@@ -1,6 +1,5 @@
 package com.newsforright.bot.control;
 
-import com.newsforright.bot.entities.Question;
 import com.newsforright.bot.entities.TelegramUser;
 import com.newsforright.bot.enums.Answer;
 import com.newsforright.bot.enums.Button;
@@ -8,7 +7,6 @@ import com.newsforright.bot.enums.Util;
 import com.newsforright.bot.persistence.DBManager;
 import com.newsforright.bot.service.TelegramOutputService;
 import com.newsforright.bot.util.CommonUtils;
-import com.newsforright.bot.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +49,7 @@ public class AnswerHandler {
         switch (currentUser.getBotState().getPhase()) {
             case GREETING -> greetingAnswer(message, currentUser);
             case TESTING -> handleQuizAnswer(message, currentUser);
+            case SOCIAL -> sendResults(message, currentUser);
             case RESULTS -> restartTest(message, currentUser);
         }
 
@@ -71,7 +70,9 @@ public class AnswerHandler {
         Button button = Button.getButton(message);
 
         //If BACK print previous question
-        if (button.equals(Util.BACK)) {
+        if (button.equals(Util.BACK) &&
+                currentUser.getBotState().getCurrentQuestion().getNumber() != 1) {
+
             goBack(currentUser);
             return;
         }
@@ -79,6 +80,7 @@ public class AnswerHandler {
         if (button.getButtonType().equals("UTIL")) return;
 
         //Else go to next question
+        assert button instanceof Answer;
         goForward((Answer) button, currentUser);
     }
 
@@ -94,10 +96,6 @@ public class AnswerHandler {
      * @param currentUser Telegram user who send message
      */
     private void goBack(TelegramUser currentUser){
-        int questionNumber = Math.toIntExact(currentUser.getBotState().getCurrentQuestion().getNumber());
-        //We need -2 because current question is the one that on the screen, left unanswered
-        Integer value = currentUser.getAnswers().get(questionNumber - 2);
-        updateResults(currentUser, -value); //subtracting
         quizController.askPrevious(currentUser);
     }
 
@@ -111,32 +109,29 @@ public class AnswerHandler {
         boolean inverted = currentUser.getBotState().getCurrentQuestion().getInverted();
 
         Integer buttonValue = button.getValue(inverted);
-        updateResults(currentUser, buttonValue);
         currentUser.getAnswers().set(questionNumber-1, buttonValue);
 
         if (questionNumber == utils.LAST_QUESTION.intValue()) { //if last show results
-            quizController.showResults(currentUser);
-            dbManager.nextPhase(currentUser.getBotState());
-            //TODO: DELETE THIS WHEN SOCIAL IMPLEMENTED!!!
-            dbManager.nextPhase(currentUser.getBotState());
+            sendSocialForm(currentUser);
         }
         else quizController.askNext(currentUser); //else go next
-    }
-
-    private void updateResults(TelegramUser currentUser, Integer value){
-        Pair<Integer, Integer> currentResults = utils.parseResults(currentUser.getResult());
-        Question currentQuestion = currentUser.getBotState().getCurrentQuestion();
-        switch (currentQuestion.getAxe()) {
-            case ECONOMICAL -> currentResults.first += value;
-            case POLITICAL -> currentResults.second += value;
-        }
-        currentUser.setResult(utils.resultsToString(currentResults));
-
     }
 
     private void startTest(TelegramUser currentUser) {
         dbManager.nextPhase(currentUser.getBotState());
         quizController.startQuiz(currentUser);
+    }
+
+    private void sendSocialForm(TelegramUser currentUser){
+        dbManager.nextPhase(currentUser.getBotState());
+        output.askGoogleForm(currentUser);
+        dbManager.saveUser(currentUser);
+    }
+
+    private void sendResults(String message, TelegramUser currentUser){
+        if (!message.equals(Util.RESULTS.getText())) return;
+        dbManager.nextPhase(currentUser.getBotState());
+        quizController.showResults(currentUser);
     }
 
 }

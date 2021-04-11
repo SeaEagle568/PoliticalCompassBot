@@ -70,23 +70,12 @@ public class CommonUtils {
     }
 
     /**
-     * Method that converts DB 'results' string in format (a,b) into Pair of integers
-     * @param str Input string in format '(a,b)'
-     * @return    Pair<Integer, Integer> where pair.first = a, pair.second = b
-     */
-    public Pair<Integer, Integer> parseResults(String str){
-        String x = str.substring(0, str.indexOf(','));
-        String y = str.substring(str.indexOf(',')+1);
-        return new Pair<>(Integer.parseInt(x), Integer.parseInt(y));
-    }
-
-    /**
      * Method that converts a Pair of integers (result) in string for
      * DB 'results' in format '(a,b)'
      * @param results Input Pair<Integer, Integer> of result
      * @return        String in format '(a,b)' where a = pair.first, b = pair.second
      */
-    public String resultsToString(Pair<Integer, Integer> results){
+    public String resultsToString(Pair<Double, Double> results){
         return results.first.toString() +
                 "," +
                 results.second.toString();
@@ -115,7 +104,8 @@ public class CommonUtils {
 
         LAST_QUESTION = (long) questionList.size();
         //TODO: Make a normal counter
-        MAX_SCORE_ECON = MAX_SCORE_POLI = questionList.size();
+        MAX_SCORE_ECON = questionList.size();
+        MAX_SCORE_POLI = questionList.size();
 
 
         //Getting image
@@ -187,17 +177,17 @@ public class CommonUtils {
         graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         graphics2D.setColor(Color.BLACK); //Outer circle
         graphics2D.fillOval(
-                (int)(finalResults.first* 8),
-                (int)(finalResults.second * 8),
-                26,
-                26
+                (int)(finalResults.first* 8) + 73,
+                (int)(finalResults.second * 8) + 66,
+                43,
+                43
         );
         graphics2D.setColor(Color.RED); //Inner circle
         graphics2D.fillOval(
-                (int)(finalResults.first * 8) + 3,
-                (int)(finalResults.second * 8) + 3,
-                20,
-                20
+                (int)(finalResults.first * 8) + 73 + 6,
+                (int)(finalResults.second * 8) + 66 + 6,
+                31,
+                31
         );
         graphics2D.dispose();
         //Creating a temp file and saving result there

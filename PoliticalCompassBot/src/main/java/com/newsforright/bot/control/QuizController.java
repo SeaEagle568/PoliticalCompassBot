@@ -96,15 +96,33 @@ public class QuizController {
      * @param currentUser TelegramUser who sent a message
      */
     public void showResults(TelegramUser currentUser) {
-        Pair<Integer, Integer> results = utils.parseResults(currentUser.getResult());
+
+        Pair<Integer, Integer> results = countResult(currentUser);
         Pair<Double, Double> finalResults = new Pair<>(
                 (100 * (double) (utils.MAX_SCORE_ECON + results.first) / (double) (2 * utils.MAX_SCORE_ECON)),
                 (100 * (double) (utils.MAX_SCORE_POLI + results.second) / (double) (2 * utils.MAX_SCORE_POLI))
         );
+        updateResults(currentUser, finalResults);
         output.sendResults(currentUser.getChatId(),
                 utils.getCompassWithDot(finalResults));
 
         dbManager.saveUser(currentUser);
+    }
+
+    private Pair<Integer, Integer> countResult(TelegramUser currentUser) {
+        Integer sumEconomical = 0;
+        Integer sumPolitical = 0;
+        for (int i = 0; i < utils.LAST_QUESTION; i++) {
+            if (utils.questionList.get(i).getAxe() == Axe.POLITICAL)
+                sumPolitical += currentUser.getAnswers().get(i);
+            else
+                sumEconomical += currentUser.getAnswers().get(i);
+        }
+        return new Pair<>(sumEconomical, sumPolitical);
+    }
+
+    private void updateResults(TelegramUser currentUser, Pair<Double, Double> results){
+        currentUser.setResult(utils.resultsToString(results));
     }
 
     private Question currentQuestion(TelegramUser currentUser) {

@@ -10,6 +10,7 @@ public enum Util implements Button {
     LETSGO("Поїхали!"),
     BACK("Назад"),
     RESTART("Пройти заново"),
+    RESULTS("Показати результати"),
     NULL("")
     ;
 

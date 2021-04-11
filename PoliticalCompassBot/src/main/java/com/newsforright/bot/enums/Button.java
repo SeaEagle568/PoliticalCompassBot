@@ -15,6 +15,9 @@ public interface Button {
             case "Скоріше ні" -> Answer.WEAK_DISAGREE;
             case "Однозначно ні" -> Answer.STRONG_DISAGREE;
             case "Назад" -> Util.BACK;
+            case "Поїхали!" -> Util.LETSGO;
+            case "Пройти заново" -> Util.RESTART;
+            case "Показати результати" -> Util.RESULTS;
             default -> Util.NULL;
         };
     }

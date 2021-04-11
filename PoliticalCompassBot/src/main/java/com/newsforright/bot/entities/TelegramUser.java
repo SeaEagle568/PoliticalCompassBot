@@ -95,7 +95,7 @@ public class TelegramUser {
 
     @Column(name="social_data_id")
     @Getter @Setter
-    private Long socialDataId; //TODO: Change this to @OneToOne relation
+    private Long socialDataId;
 
 
     @OneToOne

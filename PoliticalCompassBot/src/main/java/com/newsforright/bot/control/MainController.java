@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.ArrayList;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * This is main controller class that partially parses message
@@ -93,13 +94,17 @@ public class MainController {
                 chatId,
                 null,
                 "0,0",
-                null,
+                getNewID(),
                 state,
                 new ArrayList<>(utils.getEmptyList())
         );
         state.setUser(user);
         dbManager.saveUser(user);
         return user;
+    }
+
+    private Long getNewID() {
+        return ThreadLocalRandom.current().nextLong(10000000000L, 100000000000L);
     }
 
 }
