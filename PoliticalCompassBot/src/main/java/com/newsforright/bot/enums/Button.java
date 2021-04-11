@@ -1,5 +1,11 @@
 package com.newsforright.bot.enums;
 
+/**
+ * Interface for buttons (Util and Answers)
+ * Can return a button by text
+ *
+ * @author seaeagle
+ */
 public interface Button {
     static Button getButton(String text) {
         return switch (text) {

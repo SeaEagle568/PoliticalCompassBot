@@ -56,11 +56,6 @@ public class AnswerHandler {
 
     }
 
-    /**
-     * Starts test if users clicks LETSGO
-     * @param message String input message
-     * @param currentUser Telegram user who send message
-     */
     private void greetingAnswer(String message, TelegramUser currentUser) {
         if (!message.equals(Util.LETSGO.getText())) return;
         startTest(currentUser);
@@ -87,12 +82,6 @@ public class AnswerHandler {
         goForward((Answer) button, currentUser);
     }
 
-    /**
-     * If user on RESULTS phase and clicked on RESTART
-     * We send greetings again
-     * @param message String input message
-     * @param currentUser Telegram user who send message
-     */
     private void restartTest(String message, TelegramUser currentUser) {
         if (!message.equals(Util.RESTART.getText())) return;
 
@@ -134,11 +123,6 @@ public class AnswerHandler {
         else quizController.askNext(currentUser); //else go next
     }
 
-    /**
-     * Auxiliary method to count and update result field in TelegramUser
-     * @param currentUser Telegram user who send message
-     * @param value Value that we ADD to result
-     */
     private void updateResults(TelegramUser currentUser, Integer value){
         Pair<Integer, Integer> currentResults = utils.parseResults(currentUser.getResult());
         Question currentQuestion = currentUser.getBotState().getCurrentQuestion();
@@ -150,10 +134,6 @@ public class AnswerHandler {
 
     }
 
-    /**
-     * Changing phase and throwing all work to QuizController
-     * @param currentUser Telegram user who send message
-     */
     private void startTest(TelegramUser currentUser) {
         dbManager.nextPhase(currentUser.getBotState());
         quizController.startQuiz(currentUser);

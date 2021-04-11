@@ -179,11 +179,6 @@ public class TelegramOutputService {
         return result;
     }
 
-    /**
-     * Method that creates a KeyboardRow object with 1 button
-     * @param button Object that implements Button interface
-     * @return       KeyboardRow
-     */
     private KeyboardRow oneButtonRow(Button button) {
         KeyboardRow result = new KeyboardRow();
         result.add(button.getText());

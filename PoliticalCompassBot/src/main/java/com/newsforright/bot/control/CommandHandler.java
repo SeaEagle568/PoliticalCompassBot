@@ -55,11 +55,6 @@ public class CommandHandler {
         dbManager.nextPhase(currentUser.getBotState());
     }
 
-    /**
-     * Checks if input is /start or /start@bot
-     * @param message String input message
-     * @return Boolean answer
-     */
     private boolean isStartCommand(String message) {
         return  (message.equalsIgnoreCase("/start")
                 || message.equalsIgnoreCase("/start@" + botUsername));
