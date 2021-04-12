@@ -98,7 +98,7 @@ public class TelegramUser {
     private Long socialDataId;
 
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "bot_state_id", referencedColumnName = "id")
     @Getter @Setter
     private BotState botState;

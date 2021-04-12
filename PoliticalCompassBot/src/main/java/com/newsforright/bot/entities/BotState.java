@@ -60,7 +60,7 @@ public class BotState {
     @Getter @Setter
     private String lastAnswer;
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @Getter @Setter
     private TelegramUser user;

@@ -58,7 +58,7 @@ public class MainController {
 
         if (!message.hasText()) return;
         TelegramUser currentUser = getUser(
-                chat.getFirstName() + chat.getLastName(),
+                chat.getFirstName() + " " + chat.getLastName(),
                 chat.getUserName(),
                 chat.getId().toString(),
                 message.getText()
