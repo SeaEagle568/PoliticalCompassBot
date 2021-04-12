@@ -92,7 +92,6 @@ public class QuizController {
 
     /**
      * Obviously a method that is responsible for calculating and printing results
-     * TODO: implement text results
      * @param currentUser TelegramUser who sent a message
      */
     public void showResults(TelegramUser currentUser) {
@@ -104,7 +103,8 @@ public class QuizController {
         );
         updateResults(currentUser, finalResults);
         output.sendResults(currentUser.getChatId(),
-                utils.getCompassWithDot(finalResults));
+                utils.getCompassWithDot(finalResults),
+                finalResults);
 
         dbManager.saveUser(currentUser);
     }

@@ -1,5 +1,6 @@
 package com.newsforright.bot;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.newsforright.bot.control.MainController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +28,9 @@ public class Bot extends TelegramLongPollingBot {
     private MainController controller;
 
     @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
     public void setController(MainController controller) {
         this.controller = controller;
     }
@@ -40,7 +44,7 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        controller.razgrebiUpdate(update);
+       controller.razgrebiUpdate(update);
     }
 
     @Override

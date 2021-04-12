@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.newsforright.bot.Bot;
 import com.newsforright.bot.entities.Question;
+import com.newsforright.bot.enums.Axe;
 import com.newsforright.bot.persistence.DBManager;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Comparator;
 
 /**
  * A piece of human metabolic output
@@ -35,14 +36,17 @@ import java.util.List;
 public class CommonUtils {
     //resources
     private BufferedImage compass;
-    public List<Question> questionList = new ArrayList<>();
+    public ArrayList<Question> questionList = new ArrayList<>();
+    public ArrayList<Ideology> ideologiesList = new ArrayList<>();
     //constants
     public Long LAST_QUESTION;
-    public int MAX_SCORE_ECON;
-    public int MAX_SCORE_POLI;
+    public int MAX_SCORE_ECON = 0;
+    public int MAX_SCORE_POLI = 0;
     //resources filePaths
     @Value("${bot.resources.questions}")
     private String questionsFile;
+    @Value("${bot.resources.ideologies}")
+    private String ideologiesFile;
     @Value("${bot.resources.image}")
     private String imageFilePath;
     @Value("${bot.resources.greeting}")
@@ -92,10 +96,15 @@ public class CommonUtils {
             //Reading a json an deserializing questions
             questionList = objectMapper.readValue(
                     new FileReader(questionsFile),
-                    new TypeReference<ArrayList<Question>>(){}
+                    new TypeReference<>(){}
+            );
+            ideologiesList = objectMapper.readValue(
+                    new FileReader(ideologiesFile),
+                    new TypeReference<>() {
+                    }
             );
         } catch (IOException e) {
-            String error = "Error updating questions";
+            String error = "Error updating questions or ideologies";
             System.err.println(error);
             printErrorToDev(error); //TODO: delete on release
             e.printStackTrace();
@@ -103,9 +112,10 @@ public class CommonUtils {
         dbManager.saveQuestions(questionList); //updating db with questions
 
         LAST_QUESTION = (long) questionList.size();
-        //TODO: Make a normal counter
-        MAX_SCORE_ECON = questionList.size();
-        MAX_SCORE_POLI = questionList.size();
+        for (Question question : questionList){
+            if (question.getAxe() == Axe.POLITICAL) MAX_SCORE_POLI += 2;
+            else MAX_SCORE_ECON += 2;
+        }
 
 
         //Getting image
@@ -134,6 +144,28 @@ public class CommonUtils {
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * A method that takes one dot and returns list of 4 ideologies, nearest to that dot
+     * @param dot A Pair of doubles - result dot on coordinates
+     * @return Array List of 4 ideologies
+     */
+    public ArrayList<Ideology> getNearestDots(Pair<Double, Double> dot){
+        ArrayList<Ideology> result = new ArrayList<>();
+        ArrayList<Pair<Integer, Double>> distance = new ArrayList<>();
+        for (int i = 0; i < ideologiesList.size(); i++){
+            distance.add(new Pair<>(i, getDistance(dot, ideologiesList.get(i))));
+        }
+        distance.sort(Comparator.comparing(a -> a.second));
+        for (int i = 0; i < 4; i++) {
+            result.add(ideologiesList.get(distance.get(i).first));
+        }
+        return result;
+    }
+
+    private Double getDistance(Pair<Double, Double> dot, Ideology ideology) {
+        return Math.sqrt(Math.pow(dot.first - ideology.coords.first, 2) + Math.pow(dot.second - ideology.coords.second, 2));
     }
 
     /**

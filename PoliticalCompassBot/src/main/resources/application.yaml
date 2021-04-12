@@ -7,6 +7,7 @@ bot:
     questions: "target/classes/questions.json"
     image: "target/classes/compass.png"
     social-url: "https://docs.google.com/forms/d/e/1FAIpQLSfaHGyZ_gWNPMl0JMDPjLRvXdRorHadNAJSXEglSmGGu1G95A/viewform?usp=pp_url&entry.1626607362="
+    ideologies: "target/classes/ideologies.json"
 
 spring:
   datasource:

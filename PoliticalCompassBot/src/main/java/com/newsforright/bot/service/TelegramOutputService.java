@@ -6,6 +6,8 @@ import com.newsforright.bot.enums.Answer;
 import com.newsforright.bot.enums.Button;
 import com.newsforright.bot.enums.Util;
 import com.newsforright.bot.util.CommonUtils;
+import com.newsforright.bot.util.Ideology;
+import com.newsforright.bot.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -84,11 +86,10 @@ public class TelegramOutputService {
     /**
      * A method that sends results (Image + Text) to user
      *
-     * TODO: implement text result
      * @param chatId End user chat id
      * @param image Image(compass with dot) file from CommonUtils
      */
-    public void sendResults(String chatId, File image) {
+    public void sendResults(String chatId, File image, Pair<Double, Double> results) {
 
         SendPhoto photo = new SendPhoto();
         photo.setPhoto(new InputFile(image));
@@ -100,6 +101,7 @@ public class TelegramOutputService {
             e.printStackTrace();
             utils.printErrorToDev("Error sending file"); //TODO: delete on release
         }
+        printWithMarkup(textResults(results), chatId, resultsKeyboard());
         assert (image.delete());
     }
 
@@ -118,6 +120,19 @@ public class TelegramOutputService {
                 requestResultsKeyboard());
     }
 
+    /**
+     * Get string with 4 nearest political ideologies
+     * @param results pair of doubles - a dot
+     * @return String text ready to send
+     */
+    private String textResults(Pair<Double, Double> results) {
+        ArrayList<Ideology> ideologies = utils.getNearestDots(results);
+        StringBuilder text = new StringBuilder("Ось чотири політичні ідеології які можуть вам підійти:\n\n");
+        for (Ideology it : ideologies){
+            text.append(it.name).append("\n");
+        }
+        return text.toString();
+    }
 
     /**
      * Simple method to print some text with buttons to user

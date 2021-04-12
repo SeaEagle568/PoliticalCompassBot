@@ -1,10 +1,13 @@
 package com.newsforright.bot.util;
 
+import lombok.NoArgsConstructor;
+
 /**
  * Basic std::pair implementation
  * @param <F> First element type
  * @param <S> Second element type
  */
+@NoArgsConstructor
 public class Pair<F, S> {
     public F first;
     public S second;
