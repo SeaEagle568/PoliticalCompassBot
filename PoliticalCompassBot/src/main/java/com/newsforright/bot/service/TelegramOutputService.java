@@ -128,8 +128,10 @@ public class TelegramOutputService {
     private String textResults(Pair<Double, Double> results) {
         ArrayList<Ideology> ideologies = utils.getNearestDots(results);
         StringBuilder text = new StringBuilder("Ось чотири політичні ідеології які можуть вам підійти:\n\n");
-        for (Ideology it : ideologies){
-            text.append(it.name).append("\n");
+
+        text.append("<b>").append(ideologies.get(0).name).append("</b>\n");
+        for (int i = 1; i < ideologies.size(); i++){
+            text.append("<i>").append(ideologies.get(i).name).append("</i>\n");
         }
         return text.toString();
     }
@@ -145,6 +147,8 @@ public class TelegramOutputService {
         message.setText(text);
         message.setChatId(chatId);
         message.setReplyMarkup(markup);
+        message.enableHtml(true);
+        message.setParseMode("HTML");
         try {
             bot.execute(message);
         } catch (TelegramApiException e) {
@@ -215,7 +219,8 @@ public class TelegramOutputService {
     private ReplyKeyboardMarkup quizKeyboardMarkup() {
         ReplyKeyboardMarkup result = new ReplyKeyboardMarkup();
         List<KeyboardRow> buttonList = new ArrayList<>(quizBasicButtonList());
-        buttonList.add(oneButtonRow(Util.BACK));
+        //UNUSED
+        //buttonList.add(oneButtonRow(Util.BACK));
         result.setKeyboard(buttonList);
         return result;
     }

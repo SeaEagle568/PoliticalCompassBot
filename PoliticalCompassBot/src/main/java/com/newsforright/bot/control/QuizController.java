@@ -145,8 +145,7 @@ public class QuizController {
         if (question.getAxe() == Axe.ECONOMICAL) theme = "\"Економічна свобода\"";
         else theme = "\"Політична свобода\"";
 
-        return "Тема " + theme
-                + "\nЗапитання " + question.getNumber()
+        return "Запитання " + question.getNumber()
                 + ":\n\n" + question.getText();
     }
 

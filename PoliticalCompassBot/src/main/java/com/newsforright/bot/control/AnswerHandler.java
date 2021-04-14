@@ -47,10 +47,11 @@ public class AnswerHandler {
      */
     public void parseMessage(String message, TelegramUser currentUser) {
         switch (currentUser.getBotState().getPhase()) {
+            case PRESTART -> restartTest(message,currentUser, false);
             case GREETING -> greetingAnswer(message, currentUser);
             case TESTING -> handleQuizAnswer(message, currentUser);
             case SOCIAL -> sendResults(message, currentUser);
-            case RESULTS -> restartTest(message, currentUser);
+            case RESULTS -> restartTest(message, currentUser, true);
         }
 
     }
@@ -69,13 +70,17 @@ public class AnswerHandler {
     private void handleQuizAnswer(String message, TelegramUser currentUser) {
         Button button = Button.getButton(message);
 
-        //If BACK print previous question
+        //If BACK print previous question UNUSED
+        /*
         if (button.equals(Util.BACK) &&
+
                 currentUser.getBotState().getCurrentQuestion().getNumber() != 1) {
 
             goBack(currentUser);
             return;
         }
+        */
+
         //No button found, random text -> ignore
         if (button.getButtonType().equals("UTIL")) return;
 
@@ -84,8 +89,8 @@ public class AnswerHandler {
         goForward((Answer) button, currentUser);
     }
 
-    private void restartTest(String message, TelegramUser currentUser) {
-        if (!message.equals(Util.RESTART.getText())) return;
+    private void restartTest(String message, TelegramUser currentUser, boolean needCheck) {
+        if (!message.equals(Util.RESTART.getText()) && needCheck) return;
 
         output.printGreeting(currentUser.getChatId());
         dbManager.nextPhase(currentUser.getBotState());
