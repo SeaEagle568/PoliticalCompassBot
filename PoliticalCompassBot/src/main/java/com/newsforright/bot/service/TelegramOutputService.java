@@ -6,8 +6,6 @@ import com.newsforright.bot.enums.Answer;
 import com.newsforright.bot.enums.Button;
 import com.newsforright.bot.enums.Util;
 import com.newsforright.bot.util.CommonUtils;
-import com.newsforright.bot.util.Ideology;
-import com.newsforright.bot.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -63,9 +61,7 @@ public class TelegramOutputService {
                     Path.of(utils.getGreetingFile())
             );
         } catch (IOException e) {
-            String error = "Cannot read greeting file!";
             e.printStackTrace();
-            utils.printErrorToDev(error); //TODO: delete on release
         }
         printWithMarkup(greeting, chatId, startQuizMarkup());
 
@@ -89,7 +85,7 @@ public class TelegramOutputService {
      * @param chatId End user chat id
      * @param image Image(compass with dot) file from CommonUtils
      */
-    public void sendResults(String chatId, File image, Pair<Double, Double> results) {
+    public void sendResults(String chatId, File image, String results, String AdMessage) {
 
         SendPhoto photo = new SendPhoto();
         photo.setPhoto(new InputFile(image));
@@ -99,9 +95,9 @@ public class TelegramOutputService {
             bot.execute(photo);
         } catch (TelegramApiException e) {
             e.printStackTrace();
-            utils.printErrorToDev("Error sending file"); //TODO: delete on release
         }
-        printWithMarkup(textResults(results), chatId, resultsKeyboard());
+        printWithMarkup(results, chatId, resultsKeyboard());
+        if (AdMessage != null) printWithMarkup(AdMessage, chatId, resultsKeyboard());
         assert (image.delete());
     }
 
@@ -114,27 +110,12 @@ public class TelegramOutputService {
                 currentUser.getChatId(),
                 requestResultsKeyboard());
 
-        printWithMarkup("Просимо вас, заповнити цю форму.\n" + //request
-                "Ми не передаємо ваші дані третім особам та не використовуємо їх в комерційних цілях",
+        printWithMarkup("Просимо вас заповнити цю форму.\n" + //request
+                "Ця інформація допоможе нам проаналізувати статистику, щоб зробити доповідь про прагнення до свободи в Україні.",
                 currentUser.getChatId(),
                 requestResultsKeyboard());
     }
 
-    /**
-     * Get string with 4 nearest political ideologies
-     * @param results pair of doubles - a dot
-     * @return String text ready to send
-     */
-    private String textResults(Pair<Double, Double> results) {
-        ArrayList<Ideology> ideologies = utils.getNearestDots(results);
-        StringBuilder text = new StringBuilder("Ось чотири політичні ідеології які можуть вам підійти:\n\n");
-
-        text.append("<b>").append(ideologies.get(0).name).append("</b>\n");
-        for (int i = 1; i < ideologies.size(); i++){
-            text.append("<i>").append(ideologies.get(i).name).append("</i>\n");
-        }
-        return text.toString();
-    }
 
     /**
      * Simple method to print some text with buttons to user

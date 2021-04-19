@@ -69,18 +69,6 @@ public class AnswerHandler {
      */
     private void handleQuizAnswer(String message, TelegramUser currentUser) {
         Button button = Button.getButton(message);
-
-        //If BACK print previous question UNUSED
-        /*
-        if (button.equals(Util.BACK) &&
-
-                currentUser.getBotState().getCurrentQuestion().getNumber() != 1) {
-
-            goBack(currentUser);
-            return;
-        }
-        */
-
         //No button found, random text -> ignore
         if (button.getButtonType().equals("UTIL")) return;
 
@@ -96,13 +84,6 @@ public class AnswerHandler {
         dbManager.nextPhase(currentUser.getBotState());
     }
 
-    /**
-     * Annihilates results from last question, then asks quizController to do something
-     * @param currentUser Telegram user who send message
-     */
-    private void goBack(TelegramUser currentUser){
-        quizController.askPrevious(currentUser);
-    }
 
     /**
      * Counts results and goes to next question

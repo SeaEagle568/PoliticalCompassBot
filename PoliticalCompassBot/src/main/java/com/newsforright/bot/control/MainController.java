@@ -92,7 +92,7 @@ public class MainController {
                 name,
                 username,
                 chatId,
-                null,
+                "0",
                 "0,0",
                 getNewID(),
                 state,

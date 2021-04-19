@@ -2,7 +2,6 @@ package com.newsforright.bot.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.newsforright.bot.Bot;
 import com.newsforright.bot.entities.Question;
 import com.newsforright.bot.enums.Axe;
 import com.newsforright.bot.persistence.DBManager;
@@ -10,8 +9,6 @@ import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
@@ -58,15 +55,10 @@ public class CommonUtils {
     //dependencies
     private ObjectMapper objectMapper;
     private DBManager dbManager;
-    private Bot bot; //TODO: delete dependency on release
 
     @Autowired
     public void setObjectMapper(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-    }
-    @Autowired
-    public void setBot(Bot bot) {
-        this.bot = bot;
     }
     @Autowired
     public void setDbManager(DBManager dbManager) {
@@ -106,7 +98,6 @@ public class CommonUtils {
         } catch (IOException e) {
             String error = "Error updating questions or ideologies";
             System.err.println(error);
-            printErrorToDev(error); //TODO: delete on release
             e.printStackTrace();
         }
         dbManager.saveQuestions(questionList); //updating db with questions
@@ -124,24 +115,6 @@ public class CommonUtils {
         } catch (IOException e) {
             String error = "Error uploading image";
             System.err.println(error);
-            printErrorToDev(error); //TODO: delete on release
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Temporary method on development/test phase
-     * Prints error message directly to developer's telegram
-     * TODO: delete on release
-     * @param error String with error message
-     */
-    public void printErrorToDev(String error){
-        SendMessage message = new SendMessage();
-        message.setText(error);
-        message.setChatId(devChatId);
-        try {
-            bot.execute(message);
-        } catch (TelegramApiException e) {
             e.printStackTrace();
         }
     }
@@ -228,7 +201,6 @@ public class CommonUtils {
             ImageIO.write(finalCompass, "png", tempFile);
         } catch (IOException e) {
             e.printStackTrace();
-            printErrorToDev("Error saving new compass"); //TODO: delete on release
         }
         return tempFile;
     }
