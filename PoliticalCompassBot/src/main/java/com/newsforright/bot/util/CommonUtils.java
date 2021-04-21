@@ -120,9 +120,9 @@ public class CommonUtils {
     }
 
     /**
-     * A method that takes one dot and returns list of 4 ideologies, nearest to that dot
+     * A method that takes one dot and returns list of 3 ideologies, nearest to that dot
      * @param dot A Pair of doubles - result dot on coordinates
-     * @return Array List of 4 ideologies
+     * @return Array List of 3 ideologies
      */
     public ArrayList<Ideology> getNearestDots(Pair<Double, Double> dot){
         ArrayList<Ideology> result = new ArrayList<>();
@@ -131,7 +131,7 @@ public class CommonUtils {
             distance.add(new Pair<>(i, getDistance(dot, ideologiesList.get(i))));
         }
         distance.sort(Comparator.comparing(a -> a.second));
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 3; i++) {
             result.add(ideologiesList.get(distance.get(i).first));
         }
         return result;

@@ -73,27 +73,6 @@ public class QuizController {
     }
 
     /**
-     * Method that asks user previous question
-     * Used when user answer with a BACK button
-     * @param currentUser TelegramUser who sent a message
-     */
-    public void askPrevious(TelegramUser currentUser) {
-        Question question = currentQuestion(currentUser);
-        int questionIndex = Math.toIntExact(question.getNumber());
-        if (questionIndex == 1) return; //NO PREVIOUS QUESTION
-        //Get previous question from the list
-        //Same problem as above, 0-base index and 1-base, so to go back we need (-2)
-        Question nextQuestion = utils.questionList.get(questionIndex - 2); /// -1
-        output.askQuestion(
-                currentQuestionText(nextQuestion),
-                currentUser.getChatId(),
-                (questionIndex == 2)
-        );
-        currentUser.getBotState().setCurrentQuestion(nextQuestion);
-        dbManager.saveUser(currentUser);
-    }
-
-    /**
      * Obviously a method that is responsible for calculating and printing results
      * @param currentUser TelegramUser who sent a message
      */
@@ -125,30 +104,52 @@ public class QuizController {
      */
     private String textResults(Pair<Double, Double> results) {
         ArrayList<Ideology> ideologies = utils.getNearestDots(results);
-        StringBuilder text = new StringBuilder("Ось чотири політичні ідеології які можуть вам підійти:\n\n");
+        StringBuilder text = new StringBuilder("Ваша основна політична доктрина:\n");
+        text.append(getDoctrine(results)).append("\n\n");
+        text.append("А це - три ідеології які можуть вам підійти:\n\n");
 
-        text.append("<b>").append(ideologies.get(0).name).append("</b>\n");
-        for (int i = 1; i < ideologies.size(); i++){
-            text.append("<i>").append(ideologies.get(i).name).append("</i>\n");
+        for (Ideology ideology : ideologies) {
+            text.append("<i>").append(ideology.name).append("</i>\n");
         }
-        text.append("\nА ці країни можуть підійти вам для життя:\n");
+        text.append("\nЦі країни можуть підійти вам для життя:\n\n");
         if (results.first >= 33.33 && results.first <= 66.66
                 && results.second >= 33.33 && results.second <= 66.66){
             text.append("Колумбія, Мексика чи можна залишатись в Україні - ми теж десь по центру осей економічної та персональної свобод.");
         }
-        else if (results.first > 66.66 && results.second > 66.66){
+        else if (results.first >= 50.0 && results.second >= 50.0){
             text.append("Дубай, Малайзія, Сінгапур, штати Техас, Індіана і Флорида (привіт, зброє) і для любителів повного відриву - поселення Аміші.");
         }
-        else if (results.first < 33.33 && results.second > 66.66){
+        else if (results.first <= 50.0 && results.second >= 50.0){
             text.append("Штати Нью-Йорк і Каліфорнія, Англія, Франція та інші країни Європи з  \"соціалістичним раєм\" на землі.");
         }
-        else if (results.first < 33.33 && results.second < 33.33){
+        else if (results.first <= 50.0 && results.second <= 50.0){
             text.append("Північна Корея, Росія - як справжній поціновувач принижень і несвободи, тут ви зробите чудову кар'єру.");
         }
         else {
             text.append("Китай, Саудівська Аравія, Ірак - тут ви спробуєте, що таке втручання держави у свободу індивіда яким воно є, на практиці. Удачі!");
         }
         return text.toString();
+    }
+
+    private String getDoctrine(Pair<Double, Double> results) {
+        String res;
+        if (results.first >= 33.33 && results.first <= 66.66
+                && results.second >= 40.0 && results.second <= 66.66){
+            res = "Лібералізм";
+        }
+        else if (results.first >= 33.33 && results.second > 50.0){
+            res = "Лібертаріанство";
+        }
+        else if (results.first < 33.33 && results.second > 50.0){
+            res = "Соціалізм";
+        }
+        else if (results.first < 50.0 && results.second < 50.0){
+            res = "Коммунізм";
+        }
+        else {
+            res = "Консератизм";
+        }
+        return "<b>" + res + "</b>";
     }
 
     private Pair<Integer, Integer> countResult(TelegramUser currentUser) {
