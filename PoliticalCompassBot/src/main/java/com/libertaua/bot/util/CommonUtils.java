@@ -33,6 +33,7 @@ import java.util.Comparator;
 public class CommonUtils {
     //resources
     private BufferedImage compass;
+    private BufferedImage[] achievments = new BufferedImage[5];
     public ArrayList<Question> questionList = new ArrayList<>();
     public ArrayList<Ideology> ideologiesList = new ArrayList<>();
     //constants
@@ -112,6 +113,11 @@ public class CommonUtils {
         //Getting image
         try {
             compass = ImageIO.read(new File(imageFilePath));
+            achievments[0] = ImageIO.read(new File("target/classes/ancap.jpg"));
+            achievments[1] = ImageIO.read(new File("target/classes/ancom.jpg"));
+            achievments[2] = ImageIO.read(new File("target/classes/authright.jpg"));
+            achievments[3] = ImageIO.read(new File("target/classes/tankie.jpg"));
+            achievments[4] = ImageIO.read(new File("target/classes/normie.jpg"));
         } catch (IOException e) {
             String error = "Error uploading image";
             System.err.println(error);
@@ -174,27 +180,52 @@ public class CommonUtils {
      * @param finalResults Pair<Double, Double> coordinates from (0,0) to (100, 100) representing results
      * @return             A temporary file with resulting image
      */
-    public File getCompassWithDot(Pair<Double, Double> finalResults) {
-        BufferedImage finalCompass = deepCopy(compass); //make a copy of blank compass
-        //Some java graphics magic
-        Graphics2D graphics2D = finalCompass.createGraphics();
-        graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        graphics2D.setColor(Color.BLACK); //Outer circle
-        graphics2D.fillOval(
-                (int)(finalResults.first* 8) + 73,
-                (int)(finalResults.second * 8) + 66,
-                43,
-                43
-        );
-        graphics2D.setColor(Color.RED); //Inner circle
-        graphics2D.fillOval(
-                (int)(finalResults.first * 8) + 73 + 6,
-                (int)(finalResults.second * 8) + 66 + 6,
-                31,
-                31
-        );
-        graphics2D.dispose();
+    public Pair<File, Integer> getResultsImage(Pair<Double, Double> finalResults, boolean allZeros) {
+        BufferedImage finalCompass;
+        Integer resultType;
+        if (finalResults.first.intValue() == 100 && finalResults.second.intValue() == 100){
+            finalCompass = deepCopy(achievments[0]);
+            resultType = 0;
+        }
+        else if (finalResults.first.intValue() == 0 && finalResults.second.intValue() == 100){
+            finalCompass = deepCopy(achievments[1]);
+            resultType = 1;
+        }
+        else if (finalResults.first.intValue() == 100 && finalResults.second.intValue() == 0){
+            finalCompass = deepCopy(achievments[2]);
+            resultType = 2;
+        }
+        else if (finalResults.first.intValue() == 0 && finalResults.second.intValue() == 0){
+            finalCompass = deepCopy(achievments[3]);
+            resultType = 3;
+        }
+        else if (allZeros){
+            finalCompass = deepCopy(achievments[4]);
+            resultType = 4;
+        }
+        else {
+            resultType = 5;
+            finalCompass = deepCopy(compass); //make a copy of blank compass
+            //Some java graphics magic
+            Graphics2D graphics2D = finalCompass.createGraphics();
+            graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            graphics2D.setColor(Color.BLACK); //Outer circle
+            graphics2D.fillOval(
+                    (int) Math.round(finalResults.first * 7.17d) + 23,
+                    (int) Math.round(finalResults.second * 7.17d) + 56,
+                    52,
+                    52
+            );
+            graphics2D.setColor(Color.RED); //Inner circle
+            graphics2D.fillOval(
+                    (int) Math.round(finalResults.first * 7.17d) + 23 + 5,
+                    (int) Math.round(finalResults.second * 7.17d) + 56 + 5,
+                    42,
+                    42
+            );
+            graphics2D.dispose();
+        }
         //Creating a temp file and saving result there
         File tempFile = new File("tempImage.png");
         try {
@@ -202,6 +233,6 @@ public class CommonUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return tempFile;
+        return new Pair<>(tempFile, resultType);
     }
 }

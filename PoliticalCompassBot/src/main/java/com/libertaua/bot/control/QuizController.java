@@ -100,18 +100,21 @@ public class QuizController {
     public void showResults(TelegramUser currentUser) {
 
         Pair<Integer, Integer> results = countResult(currentUser);
+        boolean allZeros = checkNormie(currentUser);
         Pair<Double, Double> finalResults = new Pair<>(
                 (100 * (double) (utils.MAX_SCORE_ECON + results.first) / (double) (2 * utils.MAX_SCORE_ECON)),
                 (100 * (double) (utils.MAX_SCORE_POLI + results.second) / (double) (2 * utils.MAX_SCORE_POLI))
         );
         updateResults(currentUser, finalResults);
         output.sendResults(currentUser.getChatId(),
-                utils.getCompassWithDot(finalResults),
+                utils.getResultsImage(finalResults, allZeros),
                 textResults(finalResults),
                 null);
 
         dbManager.saveUser(currentUser);
     }
+
+
 
     private String getAdMessage() {
         return "Сподіваємося, вам спободався наш тест і ви задумалися над деякими фундаментальними питаннями, можливо вперше. Щоб закріпити результат знань подивіться це відео від нашої Ліберті Берегині - це найкраще, що ви знайдете на Ютубі! Зустрінемось в коментарях \uD83D\uDE09  \n" +
@@ -125,12 +128,13 @@ public class QuizController {
      */
     private String textResults(Pair<Double, Double> results) {
         ArrayList<Ideology> ideologies = utils.getNearestDots(results);
-        StringBuilder text = new StringBuilder("Ось чотири політичні ідеології які можуть вам підійти:\n\n");
+        StringBuilder text = new StringBuilder("WIP : ТУТ БУДУТЬ РЕЗУЛЬТАТИ\n\nОсь чотири політичні ідеології які можуть вам підійти:\n\n");
 
         text.append("<b>").append(ideologies.get(0).name).append("</b>\n");
         for (int i = 1; i < ideologies.size(); i++){
             text.append("<i>").append(ideologies.get(i).name).append("</i>\n");
         }
+        /*
         text.append("\nА ці країни можуть підійти вам для життя:\n");
         if (results.first >= 33.33 && results.first <= 66.66
                 && results.second >= 33.33 && results.second <= 66.66){
@@ -148,6 +152,7 @@ public class QuizController {
         else {
             text.append("Китай, Саудівська Аравія, Ірак - тут ви спробуєте, що таке втручання держави у свободу індивіда яким воно є, на практиці. Удачі!");
         }
+        */
         return text.toString();
     }
 
@@ -162,7 +167,12 @@ public class QuizController {
         }
         return new Pair<>(sumEconomical, sumPolitical);
     }
-
+    private boolean checkNormie(TelegramUser currentUser) {
+        for (int i = 0; i < utils.LAST_QUESTION; i++) {
+            if (currentUser.getAnswers().get(i) != 0) return false;
+        }
+        return true;
+    }
     private void updateResults(TelegramUser currentUser, Pair<Double, Double> results){
         currentUser.setResult(utils.resultsToString(results));
     }
