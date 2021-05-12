@@ -1,6 +1,6 @@
-package com.newsforright.bot;
+package com.libertaua.bot;
 
-import com.newsforright.bot.control.MainController;
+import com.libertaua.bot.control.MainController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

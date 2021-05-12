@@ -1,11 +1,11 @@
-package com.newsforright.bot.service;
+package com.libertaua.bot.service;
 
-import com.newsforright.bot.Bot;
-import com.newsforright.bot.entities.TelegramUser;
-import com.newsforright.bot.enums.Answer;
-import com.newsforright.bot.enums.Button;
-import com.newsforright.bot.enums.Util;
-import com.newsforright.bot.util.CommonUtils;
+import com.libertaua.bot.Bot;
+import com.libertaua.bot.entities.TelegramUser;
+import com.libertaua.bot.enums.Answer;
+import com.libertaua.bot.enums.Button;
+import com.libertaua.bot.enums.Util;
+import com.libertaua.bot.util.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -106,6 +106,7 @@ public class TelegramOutputService {
      * @param currentUser Telegram user that send a message
      */
     public void askGoogleForm(TelegramUser currentUser) {
+        /*
         printWithMarkup(googleFormUrl + currentUser.getSocialDataId(), //form
                 currentUser.getChatId(),
                 requestResultsKeyboard());
@@ -114,6 +115,8 @@ public class TelegramOutputService {
                 "Ця інформація допоможе нам проаналізувати статистику, щоб зробити доповідь про прагнення до свободи в Україні.",
                 currentUser.getChatId(),
                 requestResultsKeyboard());
+
+         */
     }
 
 

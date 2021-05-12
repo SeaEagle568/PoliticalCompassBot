@@ -1,4 +1,4 @@
-package com.newsforright.bot.entities;
+package com.libertaua.bot.entities;
 
 import com.vladmihalcea.hibernate.type.array.ListArrayType;
 import lombok.Getter;

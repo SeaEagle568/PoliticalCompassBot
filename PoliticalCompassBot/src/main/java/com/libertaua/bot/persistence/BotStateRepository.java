@@ -1,6 +1,6 @@
-package com.newsforright.bot.persistence;
+package com.libertaua.bot.persistence;
 
-import com.newsforright.bot.entities.BotState;
+import com.libertaua.bot.entities.BotState;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

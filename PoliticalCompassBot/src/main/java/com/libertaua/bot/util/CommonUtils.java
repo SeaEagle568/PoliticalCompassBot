@@ -1,10 +1,10 @@
-package com.newsforright.bot.util;
+package com.libertaua.bot.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.newsforright.bot.entities.Question;
-import com.newsforright.bot.enums.Axe;
-import com.newsforright.bot.persistence.DBManager;
+import com.libertaua.bot.entities.Question;
+import com.libertaua.bot.enums.Axe;
+import com.libertaua.bot.persistence.DBManager;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

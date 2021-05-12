@@ -1,9 +1,9 @@
-package com.newsforright.bot.control;
+package com.libertaua.bot.control;
 
-import com.newsforright.bot.entities.BotState;
-import com.newsforright.bot.entities.TelegramUser;
-import com.newsforright.bot.persistence.DBManager;
-import com.newsforright.bot.util.CommonUtils;
+import com.libertaua.bot.entities.BotState;
+import com.libertaua.bot.entities.TelegramUser;
+import com.libertaua.bot.persistence.DBManager;
+import com.libertaua.bot.util.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Chat;

@@ -1,10 +1,10 @@
-package com.newsforright.bot.control;
+package com.libertaua.bot.control;
 
-import com.newsforright.bot.entities.BotState;
-import com.newsforright.bot.entities.TelegramUser;
-import com.newsforright.bot.enums.Phase;
-import com.newsforright.bot.persistence.DBManager;
-import com.newsforright.bot.service.TelegramOutputService;
+import com.libertaua.bot.entities.BotState;
+import com.libertaua.bot.entities.TelegramUser;
+import com.libertaua.bot.enums.Phase;
+import com.libertaua.bot.persistence.DBManager;
+import com.libertaua.bot.service.TelegramOutputService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

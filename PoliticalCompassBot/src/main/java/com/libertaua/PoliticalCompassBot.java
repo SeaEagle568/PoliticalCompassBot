@@ -1,4 +1,4 @@
-package com.newsforright;
+package com.libertaua;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.SpringApplication;

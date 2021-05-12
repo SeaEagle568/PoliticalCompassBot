@@ -1,13 +1,13 @@
-package com.newsforright.bot.control;
+package com.libertaua.bot.control;
 
-import com.newsforright.bot.entities.Question;
-import com.newsforright.bot.entities.TelegramUser;
-import com.newsforright.bot.enums.Axe;
-import com.newsforright.bot.persistence.DBManager;
-import com.newsforright.bot.service.TelegramOutputService;
-import com.newsforright.bot.util.CommonUtils;
-import com.newsforright.bot.util.Ideology;
-import com.newsforright.bot.util.Pair;
+import com.libertaua.bot.entities.Question;
+import com.libertaua.bot.entities.TelegramUser;
+import com.libertaua.bot.enums.Axe;
+import com.libertaua.bot.persistence.DBManager;
+import com.libertaua.bot.service.TelegramOutputService;
+import com.libertaua.bot.util.CommonUtils;
+import com.libertaua.bot.util.Ideology;
+import com.libertaua.bot.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -108,7 +108,7 @@ public class QuizController {
         output.sendResults(currentUser.getChatId(),
                 utils.getCompassWithDot(finalResults),
                 textResults(finalResults),
-                getAdMessage());
+                null);
 
         dbManager.saveUser(currentUser);
     }

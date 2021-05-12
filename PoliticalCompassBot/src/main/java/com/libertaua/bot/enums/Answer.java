@@ -1,4 +1,4 @@
-package com.newsforright.bot.enums;
+package com.libertaua.bot.enums;
 
 import lombok.Getter;
 

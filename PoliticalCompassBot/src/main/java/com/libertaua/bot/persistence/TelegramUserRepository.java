@@ -1,6 +1,6 @@
-package com.newsforright.bot.persistence;
+package com.libertaua.bot.persistence;
 
-import com.newsforright.bot.entities.TelegramUser;
+import com.libertaua.bot.entities.TelegramUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

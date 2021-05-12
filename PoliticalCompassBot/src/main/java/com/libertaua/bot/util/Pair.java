@@ -1,4 +1,4 @@
-package com.newsforright.bot.util;
+package com.libertaua.bot.util;
 
 import lombok.NoArgsConstructor;
 

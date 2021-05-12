@@ -1,12 +1,12 @@
-package com.newsforright.bot.control;
+package com.libertaua.bot.control;
 
-import com.newsforright.bot.entities.TelegramUser;
-import com.newsforright.bot.enums.Answer;
-import com.newsforright.bot.enums.Button;
-import com.newsforright.bot.enums.Util;
-import com.newsforright.bot.persistence.DBManager;
-import com.newsforright.bot.service.TelegramOutputService;
-import com.newsforright.bot.util.CommonUtils;
+import com.libertaua.bot.entities.TelegramUser;
+import com.libertaua.bot.enums.Answer;
+import com.libertaua.bot.enums.Button;
+import com.libertaua.bot.enums.Util;
+import com.libertaua.bot.persistence.DBManager;
+import com.libertaua.bot.service.TelegramOutputService;
+import com.libertaua.bot.util.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
  * @author seaeagle
  */
 @Service
-public class AnswerHandler {
+public class  AnswerHandler {
 
     private TelegramOutputService output;
     private DBManager dbManager;
@@ -69,6 +69,13 @@ public class AnswerHandler {
      */
     private void handleQuizAnswer(String message, TelegramUser currentUser) {
         Button button = Button.getButton(message);
+        //If BACK print previous question
+        if (button.equals(Util.BACK) &&
+                currentUser.getBotState().getCurrentQuestion().getNumber() != 1) {
+
+            goBack(currentUser);
+            return;
+        }
         //No button found, random text -> ignore
         if (button.getButtonType().equals("UTIL")) return;
 
@@ -84,7 +91,13 @@ public class AnswerHandler {
         dbManager.nextPhase(currentUser.getBotState());
     }
 
-
+    /**
+     * Annihilates results from last question, then asks quizController to do something
+     * @param currentUser Telegram user who send message
+     */
+    private void goBack(TelegramUser currentUser){
+        quizController.askPrevious(currentUser);
+    }
     /**
      * Counts results and goes to next question
      * @param button Answer button that was pressed

@@ -1,9 +1,9 @@
-package com.newsforright.bot.persistence;
+package com.libertaua.bot.persistence;
 
-import com.newsforright.bot.entities.BotState;
-import com.newsforright.bot.entities.Question;
-import com.newsforright.bot.entities.TelegramUser;
-import com.newsforright.bot.enums.Phase;
+import com.libertaua.bot.entities.BotState;
+import com.libertaua.bot.entities.Question;
+import com.libertaua.bot.entities.TelegramUser;
+import com.libertaua.bot.enums.Phase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 

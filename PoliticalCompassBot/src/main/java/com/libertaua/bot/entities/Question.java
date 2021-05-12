@@ -1,6 +1,6 @@
-package com.newsforright.bot.entities;
+package com.libertaua.bot.entities;
 
-import com.newsforright.bot.enums.Axe;
+import com.libertaua.bot.enums.Axe;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
