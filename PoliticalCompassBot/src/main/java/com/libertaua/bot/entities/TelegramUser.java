@@ -10,6 +10,7 @@ import org.hibernate.annotations.TypeDef;
 import org.springframework.context.annotation.Scope;
 
 import javax.persistence.*;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static javax.persistence.GenerationType.SEQUENCE;
@@ -117,6 +118,13 @@ public class TelegramUser {
     @Type(type="list-array")
     @Getter @Setter
     private List<Integer> answers;
+
+    @Column(
+            name="answer_time",
+            columnDefinition = "TIMESTAMP WITH TIME ZONE"
+    )
+    @Getter @Setter
+    private OffsetDateTime answerTime;
 
     //If only Lombok had @SomeArgsConstructor......
     public TelegramUser(String name,

@@ -11,6 +11,7 @@ import com.libertaua.bot.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 
 /**
@@ -98,7 +99,7 @@ public class QuizController {
      * @param currentUser TelegramUser who sent a message
      */
     public void showResults(TelegramUser currentUser) {
-
+        currentUser.setAnswerTime(OffsetDateTime.now());
         Pair<Integer, Integer> results = countResult(currentUser);
         boolean allZeros = checkNormie(currentUser);
         Pair<Double, Double> finalResults = new Pair<>(
@@ -126,7 +127,6 @@ public class QuizController {
 
     /**
      * Get string with 4 nearest political ideologies
-     * @param results pair of doubles - a dot
      * @return String text ready to send
      */
     private String textResults() {

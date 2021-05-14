@@ -1,6 +1,5 @@
 package com.libertaua.bot.control;
 
-import com.libertaua.bot.entities.BotState;
 import com.libertaua.bot.entities.TelegramUser;
 import com.libertaua.bot.enums.Phase;
 import com.libertaua.bot.persistence.DBManager;
@@ -40,23 +39,25 @@ public class CommandHandler {
      */
     public void parseMessage(String message, TelegramUser currentUser) {
         if (isStartCommand(message)){
-            startGreeting(currentUser, currentUser.getBotState());
+            startGreeting(currentUser);
         }
     }
 
     /**
      * Only if user on PRESTART sends greetings
      * @param currentUser Telegram user who send message
-     * @param state IoC user.getBotState()
      */
-    private void startGreeting(TelegramUser currentUser, BotState state) {
-        if (state.getPhase() != Phase.PRESTART) return;
+    private void startGreeting(TelegramUser currentUser) {
+        currentUser.getBotState().setPhase(Phase.PRESTART);
+        dbManager.saveUser(currentUser);
         output.printGreeting(currentUser.getChatId());
         dbManager.nextPhase(currentUser.getBotState());
     }
 
     private boolean isStartCommand(String message) {
         return  (message.equalsIgnoreCase("/start")
-                || message.equalsIgnoreCase("/start@" + botUsername));
+                || message.equalsIgnoreCase("/start@" + botUsername)
+                || message.equalsIgnoreCase("/restart")
+                || message.equalsIgnoreCase("/restart@" + botUsername));
     }
 }

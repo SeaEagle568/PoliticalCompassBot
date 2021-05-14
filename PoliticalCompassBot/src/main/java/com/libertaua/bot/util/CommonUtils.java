@@ -228,9 +228,16 @@ public class CommonUtils {
         }
         else {
             resultType = 5;
-            if (userPic == null) finalCompass = getCompassWithDot(deepCopy(compass), finalResults, 23, 56, 52, 42, 7.17d);
+            if (userPic == null) {
+                finalCompass = getCompassWithDot(deepCopy(compass),
+                        finalResults,
+                        23, 56, 52, 42, 7.17d);
+            }
             else {
-                finalCompass = getCompassWithPic(userPic,deepCopy(compass), finalResults, 23, 56, 52, 7.17d);
+                finalCompass = getCompassWithPic(userPic,
+                        deepCopy(compass),
+                        finalResults,
+                        23, 56, 52, 7.17d);
             }
         }
         //Creating a temp file and saving result there

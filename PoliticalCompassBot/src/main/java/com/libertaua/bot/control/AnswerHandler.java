@@ -47,7 +47,7 @@ public class  AnswerHandler {
      */
     public void parseMessage(String message, TelegramUser currentUser) {
         switch (currentUser.getBotState().getPhase()) {
-            case PRESTART -> restartTest(message,currentUser);
+            case PRESTART -> restartTest(currentUser);
             case GREETING -> greetingAnswer(message, currentUser);
             case TESTING -> handleQuizAnswer(message, currentUser);
             case SOCIAL -> {
@@ -64,9 +64,14 @@ public class  AnswerHandler {
         //output.debugMessage(currentUser.getChatId(), message + " " + button.getText());
         if (button.equals(Util.IDEOLOGIES)){
             quizController.showIdeologies(currentUser);
+            return;
         }
-        else if (button.equals(Util.ARTICLE)){
+        if (button.equals(Util.ARTICLE)){
             output.printArticle(currentUser);
+            return;
+        }
+        if (button.equals(Util.RESTART)){
+            restartTest(currentUser);
         }
     }
 
@@ -115,7 +120,7 @@ public class  AnswerHandler {
         goForward((Answer) button, currentUser);
     }
 
-    private void restartTest(String message, TelegramUser currentUser) {
+    private void restartTest(TelegramUser currentUser) {
         output.printGreeting(currentUser.getChatId());
         dbManager.nextPhase(currentUser.getBotState());
     }

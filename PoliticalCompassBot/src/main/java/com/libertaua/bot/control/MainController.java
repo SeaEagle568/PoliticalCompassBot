@@ -59,8 +59,10 @@ public class MainController {
      * @param update Update from Bot class
      */
     public void razgrebiUpdate(Update update) {
-        Chat chat = update.getMessage().getChat();
+        if (!update.hasMessage()) return;
         Message message = update.getMessage();
+        Chat chat = message.getChat();
+
 
         if (!message.hasText()) return;
         TelegramUser currentUser = getUser(
