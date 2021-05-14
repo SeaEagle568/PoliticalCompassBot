@@ -10,11 +10,13 @@ import com.libertaua.bot.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -96,30 +98,38 @@ public class TelegramOutputService {
             case 3 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат крайній авторитарно-лівий. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>гулаггенсек</b>", chatId, resultsKeyboard());
             case 4 -> printWithMarkup("Ви відповіли \"Важко відповісти\" на всі запитання!\nА вас і правда не цікавить політика", chatId, resultsKeyboard());
             case 5 -> printWithMarkup(results, chatId, resultsKeyboard());
+            case 6 -> printWithMarkup("Вітаємо, ви досягли центру координат!\nВи більш-менш <b>радикальний центрист</b>, здатні смажити не тільки стейки", chatId, resultsKeyboard());
         }
         //printWithMarkup(results, chatId, resultsKeyboard());
         if (AdMessage != null) printWithMarkup(AdMessage, chatId, resultsKeyboard());
-
     }
 
     /**
-     * A method to send google form and ask to complete it
+     * A method to ask last question (about seriousness)
      * @param currentUser Telegram user that send a message
      */
-    public void askGoogleForm(TelegramUser currentUser) {
-
-        printWithMarkup("Тут може бути ваша реклама", //Ad
-                currentUser.getChatId(),
-                requestResultsKeyboard());
-
-        /*
-        printWithMarkup("Просимо вас заповнити цю форму.\n" + //request
-                "Ця інформація допоможе нам проаналізувати статистику, щоб зробити доповідь про прагнення до свободи в Україні.",
-                currentUser.getChatId(),
-                requestResultsKeyboard());
-
-         */
+    public void askSerious(TelegramUser currentUser) {
+        askQuestion("Ви серйозно проходили тест?", currentUser.getChatId(), false);
     }
+
+    public void debugMessage(String chatId, String message){
+        printWithMarkup("Debug message:\n\n" + message, chatId, new ReplyKeyboardRemove(false));
+    }
+    public void printMessage(String chatId, String message){
+        printWithMarkup(message, chatId, new ReplyKeyboardRemove(false));
+    }
+    public void printArticle(TelegramUser currentUser) {
+        ForwardMessage forwardMessage = new ForwardMessage();
+        forwardMessage.setFromChatId("@liberta_ua");
+        forwardMessage.setChatId(currentUser.getChatId());
+        forwardMessage.setMessageId(345);
+        try {
+            bot.execute(forwardMessage);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private void sendImage(String chatId, File image){
         SendPhoto photo = new SendPhoto();
@@ -177,6 +187,11 @@ public class TelegramOutputService {
         ReplyKeyboardMarkup result = new ReplyKeyboardMarkup();
         result.setKeyboard(
                 List.of(
+                        oneButtonRow(Util.IDEOLOGIES),
+                        oneButtonRow(Util.ARTICLE),
+                        oneButtonRow(Util.WOMAN),
+                        oneButtonRow(Util.MEMES),
+                        oneButtonRow(Util.CHAT),
                         oneButtonRow(Util.RESTART)
                 )
         );
@@ -226,5 +241,6 @@ public class TelegramOutputService {
         result.add(button.getText());
         return result;
     }
+
 
 }

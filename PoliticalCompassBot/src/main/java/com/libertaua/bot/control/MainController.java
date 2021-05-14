@@ -3,6 +3,7 @@ package com.libertaua.bot.control;
 import com.libertaua.bot.entities.BotState;
 import com.libertaua.bot.entities.TelegramUser;
 import com.libertaua.bot.persistence.DBManager;
+import com.libertaua.bot.service.TelegramOutputService;
 import com.libertaua.bot.util.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,12 @@ public class MainController {
     private CommandHandler commandHandler;
     private DBManager dbManager;
     private CommonUtils utils;
+    private TelegramOutputService output;
 
+    @Autowired
+    public void setOutput(TelegramOutputService output) {
+        this.output = output;
+    }
     @Autowired
     public void setUtils(CommonUtils utils) {
         this.utils = utils;
@@ -61,9 +67,14 @@ public class MainController {
                 chat.getFirstName() + " " + chat.getLastName(),
                 chat.getUserName(),
                 chat.getId().toString(),
+                String.valueOf(message.getFrom().getId()),
                 message.getText()
         );
+       /* if (message.getForwardFromChat() != null) {
+            output.debugMessage(String.valueOf(message.getForwardFromChat().getId()), String.valueOf(chat.getId()));
+        }
 
+        */
         if (message.isCommand())
             commandHandler.parseMessage(message.getText(), currentUser);
         else
@@ -78,13 +89,14 @@ public class MainController {
      * @param message String message
      * @return        Returns TelegramUser entity
      */
-    private TelegramUser getUser(String name, String username, String chatId, String message){
+    private TelegramUser getUser(String name, String username, String chatId, String userId, String message){
 
         TelegramUser user;
         if (dbManager.userExists(chatId)) {
             user = dbManager.userByChatId(chatId);
             user.getBotState().setLastAnswer(message);
-            dbManager.saveState(user.getBotState());
+            user.setUserId(userId);
+            dbManager.saveUser(user);
             return user;
         }
         BotState state = new BotState(message, null, utils.questionList.get(0));
@@ -92,6 +104,7 @@ public class MainController {
                 name,
                 username,
                 chatId,
+                userId,
                 "0",
                 "0,0",
                 getNewID(),

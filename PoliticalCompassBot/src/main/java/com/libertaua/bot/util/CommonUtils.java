@@ -2,17 +2,24 @@ package com.libertaua.bot.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.libertaua.bot.Bot;
 import com.libertaua.bot.entities.Question;
+import com.libertaua.bot.entities.TelegramUser;
 import com.libertaua.bot.enums.Axe;
 import com.libertaua.bot.persistence.DBManager;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.methods.GetUserProfilePhotos;
+import org.telegram.telegrambots.meta.api.objects.PhotoSize;
+import org.telegram.telegrambots.meta.api.objects.UserProfilePhotos;
 
 import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
@@ -21,6 +28,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * A piece of human metabolic output
@@ -33,7 +41,7 @@ import java.util.Comparator;
 public class CommonUtils {
     //resources
     private BufferedImage compass;
-    private BufferedImage[] achievments = new BufferedImage[5];
+    private final BufferedImage[] achievments = new BufferedImage[6];
     public ArrayList<Question> questionList = new ArrayList<>();
     public ArrayList<Ideology> ideologiesList = new ArrayList<>();
     //constants
@@ -56,7 +64,12 @@ public class CommonUtils {
     //dependencies
     private ObjectMapper objectMapper;
     private DBManager dbManager;
+    private Bot bot;
 
+    @Autowired
+    public void setBot(Bot bot) {
+        this.bot = bot;
+    }
     @Autowired
     public void setObjectMapper(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
@@ -76,6 +89,11 @@ public class CommonUtils {
         return results.first.toString() +
                 "," +
                 results.second.toString();
+    }
+    public Pair<Double, Double> resultsToPair(String str){
+        String x = str.substring(0, str.indexOf(','));
+        String y = str.substring(str.indexOf(',')+1);
+        return new Pair<>(Double.parseDouble(x), Double.parseDouble(y));
     }
 
     /**
@@ -118,6 +136,7 @@ public class CommonUtils {
             achievments[2] = ImageIO.read(new File("target/classes/authright.jpg"));
             achievments[3] = ImageIO.read(new File("target/classes/tankie.jpg"));
             achievments[4] = ImageIO.read(new File("target/classes/normie.jpg"));
+            achievments[5] = ImageIO.read(new File("target/classes/gigachad.png"));
         } catch (IOException e) {
             String error = "Error uploading image";
             System.err.println(error);
@@ -180,7 +199,7 @@ public class CommonUtils {
      * @param finalResults Pair<Double, Double> coordinates from (0,0) to (100, 100) representing results
      * @return             A temporary file with resulting image
      */
-    public Pair<File, Integer> getResultsImage(Pair<Double, Double> finalResults, boolean allZeros) {
+    public Pair<File, Integer> getResultsImage(BufferedImage userPic, Pair<Double, Double> finalResults, boolean allZeros) {
         BufferedImage finalCompass;
         Integer resultType;
         if (finalResults.first.intValue() == 100 && finalResults.second.intValue() == 100){
@@ -203,28 +222,16 @@ public class CommonUtils {
             finalCompass = deepCopy(achievments[4]);
             resultType = 4;
         }
+        else if (finalResults.first.intValue() == 50 && finalResults.second.intValue() == 50){
+            finalCompass = deepCopy(achievments[5]);
+            resultType = 6;
+        }
         else {
             resultType = 5;
-            finalCompass = deepCopy(compass); //make a copy of blank compass
-            //Some java graphics magic
-            Graphics2D graphics2D = finalCompass.createGraphics();
-            graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            graphics2D.setColor(Color.BLACK); //Outer circle
-            graphics2D.fillOval(
-                    (int) Math.round(finalResults.first * 7.17d) + 23,
-                    (int) Math.round(finalResults.second * 7.17d) + 56,
-                    52,
-                    52
-            );
-            graphics2D.setColor(Color.RED); //Inner circle
-            graphics2D.fillOval(
-                    (int) Math.round(finalResults.first * 7.17d) + 23 + 5,
-                    (int) Math.round(finalResults.second * 7.17d) + 56 + 5,
-                    42,
-                    42
-            );
-            graphics2D.dispose();
+            if (userPic == null) finalCompass = getCompassWithDot(deepCopy(compass), finalResults, 23, 56, 52, 42, 7.17d);
+            else {
+                finalCompass = getCompassWithPic(userPic,deepCopy(compass), finalResults, 23, 56, 52, 7.17d);
+            }
         }
         //Creating a temp file and saving result there
         File tempFile = new File("tempImage.png");
@@ -235,4 +242,80 @@ public class CommonUtils {
         }
         return new Pair<>(tempFile, resultType);
     }
+
+    private BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
+        BufferedImage resizedImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics2D = resizedImage.createGraphics();
+        graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        graphics2D.drawImage(originalImage, 0, 0, targetWidth, targetHeight, null);
+        graphics2D.dispose();
+        return resizedImage;
+    }
+
+    private BufferedImage getCircle(BufferedImage original){
+        int width = original.getWidth();
+        BufferedImage circleBuffer = new BufferedImage(width, width, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = circleBuffer.createGraphics();
+        g2.setClip(new Ellipse2D.Float(0, 0, width, width));
+        g2.drawImage(original, 0, 0, width, width, null);
+        g2.dispose();
+        return circleBuffer;
+    }
+
+    private BufferedImage getCompassWithPic(BufferedImage userPic, BufferedImage compass, Pair<Double, Double> finalResults, int shiftX, int shiftY, int R, double multiplier) {
+        BufferedImage finalPic = resizeImage(getCircle(userPic),R, R);
+        Graphics2D graphics2D = compass.createGraphics();
+        graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        //graphics2D.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        graphics2D.drawImage(finalPic,
+                (int) (Math.round(finalResults.first * multiplier) + shiftX),
+                (int) (Math.round(finalResults.second * multiplier) + shiftY),
+                null
+                );
+        graphics2D.dispose();
+        return compass;
+    }
+
+    private BufferedImage getCompassWithDot(BufferedImage compass, Pair<Double, Double> finalResults, double shiftX, double shiftY, double R, double r, double multiplier)
+    {
+        Graphics2D graphics2D = compass.createGraphics();
+        graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        graphics2D.setColor(Color.BLACK); //Outer circle
+        graphics2D.fillOval(
+                (int) (Math.round(finalResults.first * multiplier) + shiftX),
+                (int) (Math.round(finalResults.second * multiplier) + shiftY),
+                (int) R,
+                (int) R
+        );
+        graphics2D.setColor(Color.RED); //Inner circle
+        graphics2D.fillOval(
+                (int) (Math.round(finalResults.first * multiplier) + shiftX + (R-r) / 2),
+                (int) (Math.round(finalResults.second * multiplier) + shiftY + (R-r) / 2),
+                (int) r,
+                (int) r
+        );
+        graphics2D.dispose();
+        return compass;
+    }
+
+    public BufferedImage getUserPic(TelegramUser currentUser) {
+        GetUserProfilePhotos getUserProfilePhotos = new GetUserProfilePhotos(Long.parseLong(currentUser.getUserId()), 0, 1);
+        try {
+            UserProfilePhotos userPhotos = bot.execute(getUserProfilePhotos);
+            List<List<PhotoSize>> photoes = userPhotos.getPhotos();
+            String fileId = photoes.get(0).get(0).getFileId();
+            GetFile fileGetter = new GetFile();
+            fileGetter.setFileId(fileId);
+            File photoFile = bot.downloadFile(bot.execute(fileGetter));
+            return ImageIO.read(photoFile);
+        } catch (Exception e) {
+           // e.printStackTrace();
+        }
+        return null;
+
+    }
+
 }

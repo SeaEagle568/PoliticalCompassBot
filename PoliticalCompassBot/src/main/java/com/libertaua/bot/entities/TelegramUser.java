@@ -80,11 +80,18 @@ public class TelegramUser {
     private String chatId;
 
     @Column(
-            name="email",
+            name="user_id",
             columnDefinition = "TEXT"
     )
     @Getter @Setter
-    private String email; //Why is it here?
+    private String userId;
+
+    @Column(
+            name="seriously",
+            columnDefinition = "TEXT"
+    )
+    @Getter @Setter
+    private String seriously;
 
     @Column(
             name="result",
@@ -115,7 +122,8 @@ public class TelegramUser {
     public TelegramUser(String name,
                         String username,
                         String chatId,
-                        String email,
+                        String userId,
+                        String seriously,
                         String result,
                         Long socialDataId,
                         BotState botState,
@@ -124,7 +132,8 @@ public class TelegramUser {
         this.name = name;
         this.username = username;
         this.chatId = chatId;
-        this.email = email;
+        this.userId = userId;
+        this.seriously = seriously;
         this.result = result;
         this.socialDataId = socialDataId;
         this.botState = botState;

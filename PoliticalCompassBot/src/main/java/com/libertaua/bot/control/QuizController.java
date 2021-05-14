@@ -107,13 +107,16 @@ public class QuizController {
         );
         updateResults(currentUser, finalResults);
         output.sendResults(currentUser.getChatId(),
-                utils.getResultsImage(finalResults, allZeros),
-                textResults(finalResults),
-                null);
+                utils.getResultsImage(utils.getUserPic(currentUser), finalResults, allZeros),
+                textResults(),
+                "Такі координати визначив компас. Куди рухатись далі — обираєте ви.");
 
         dbManager.saveUser(currentUser);
     }
-
+    public void showIdeologies(TelegramUser currentUser) {
+        output.printMessage(currentUser.getChatId(), getIdeologies(utils.resultsToPair(currentUser.getResult())));
+        dbManager.saveUser(currentUser);
+    }
 
 
     private String getAdMessage() {
@@ -126,33 +129,26 @@ public class QuizController {
      * @param results pair of doubles - a dot
      * @return String text ready to send
      */
-    private String textResults(Pair<Double, Double> results) {
-        ArrayList<Ideology> ideologies = utils.getNearestDots(results);
-        StringBuilder text = new StringBuilder("WIP : ТУТ БУДУТЬ РЕЗУЛЬТАТИ\n\nОсь чотири політичні ідеології які можуть вам підійти:\n\n");
+    private String textResults() {
 
+        StringBuilder text = new StringBuilder("WIP : ТУТ БУДУТЬ РЕЗУЛЬТАТИ");//\n\nОсь чотири політичні ідеології які можуть вам підійти:\n\n");
+        /*
         text.append("<b>").append(ideologies.get(0).name).append("</b>\n");
         for (int i = 1; i < ideologies.size(); i++){
             text.append("<i>").append(ideologies.get(i).name).append("</i>\n");
         }
-        /*
-        text.append("\nА ці країни можуть підійти вам для життя:\n");
-        if (results.first >= 33.33 && results.first <= 66.66
-                && results.second >= 33.33 && results.second <= 66.66){
-            text.append("Колумбія, Мексика чи можна залишатись в Україні - ми теж десь по центру осей економічної та персональної свобод.");
-        }
-        else if (results.first > 66.66 && results.second > 66.66){
-            text.append("Дубай, Малайзія, Сінгапур, штати Техас, Індіана і Флорида (привіт, зброє) і для любителів повного відриву - поселення Аміші.");
-        }
-        else if (results.first < 33.33 && results.second > 66.66){
-            text.append("Штати Нью-Йорк і Каліфорнія, Англія, Франція та інші країни Європи з  \"соціалістичним раєм\" на землі.");
-        }
-        else if (results.first < 33.33 && results.second < 33.33){
-            text.append("Північна Корея, Росія - як справжній поціновувач принижень і несвободи, тут ви зробите чудову кар'єру.");
-        }
-        else {
-            text.append("Китай, Саудівська Аравія, Ірак - тут ви спробуєте, що таке втручання держави у свободу індивіда яким воно є, на практиці. Удачі!");
-        }
         */
+        return text.toString();
+    }
+
+    private String getIdeologies(Pair<Double, Double> results){
+        ArrayList<Ideology> ideologies = utils.getNearestDots(results);
+        StringBuilder text = new StringBuilder("Ось три політичні ідеології які можуть вам підійти:\n\n");
+        text.append("<b>").append(ideologies.get(0).name).append("</b>\n");
+        for (int i = 1; i < ideologies.size()-1; i++){
+            text.append("<i>").append(ideologies.get(i).name).append("</i>\n");
+        }
+
         return text.toString();
     }
 
@@ -195,6 +191,7 @@ public class QuizController {
         return "Запитання " + question.getNumber()
                 + ":\n\n" + question.getText();
     }
+
 
 
 }

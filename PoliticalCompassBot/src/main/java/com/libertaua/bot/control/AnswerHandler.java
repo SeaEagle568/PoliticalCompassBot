@@ -47,13 +47,44 @@ public class  AnswerHandler {
      */
     public void parseMessage(String message, TelegramUser currentUser) {
         switch (currentUser.getBotState().getPhase()) {
-            case PRESTART -> restartTest(message,currentUser, false);
+            case PRESTART -> restartTest(message,currentUser);
             case GREETING -> greetingAnswer(message, currentUser);
             case TESTING -> handleQuizAnswer(message, currentUser);
-            case SOCIAL -> sendResults(message, currentUser);
-            case RESULTS -> restartTest(message, currentUser, true);
+            case SOCIAL -> {
+                handleLastAnswer(message, currentUser);
+                sendResults(currentUser);
+            }
+            case RESULTS -> handleResultsAnswer(message, currentUser);
         }
 
+    }
+
+    private void handleResultsAnswer(String message, TelegramUser currentUser) {
+        Button button = Button.getButton(message);
+        //output.debugMessage(currentUser.getChatId(), message + " " + button.getText());
+        if (button.equals(Util.IDEOLOGIES)){
+            quizController.showIdeologies(currentUser);
+        }
+        else if (button.equals(Util.ARTICLE)){
+            output.printArticle(currentUser);
+        }
+    }
+
+    private void handleLastAnswer(String message, TelegramUser currentUser) {
+        Button button = Button.getButton(message);
+        //If BACK print previous question
+        if (button.equals(Util.BACK) &&
+                currentUser.getBotState().getCurrentQuestion().getNumber() != 1) {
+
+            goBack(currentUser);
+            return;
+        }
+        //No button found, random text -> ignore
+        if (button.getButtonType().equals("UTIL")) return;
+
+        //Else add results
+        assert button instanceof Answer;
+        currentUser.setSeriously(((Answer) button).name());
     }
 
     private void greetingAnswer(String message, TelegramUser currentUser) {
@@ -84,9 +115,7 @@ public class  AnswerHandler {
         goForward((Answer) button, currentUser);
     }
 
-    private void restartTest(String message, TelegramUser currentUser, boolean needCheck) {
-        if (!message.equals(Util.RESTART.getText()) && needCheck) return;
-
+    private void restartTest(String message, TelegramUser currentUser) {
         output.printGreeting(currentUser.getChatId());
         dbManager.nextPhase(currentUser.getBotState());
     }
@@ -111,7 +140,7 @@ public class  AnswerHandler {
         currentUser.getAnswers().set(questionNumber-1, buttonValue);
 
         if (questionNumber == utils.LAST_QUESTION.intValue()) { //if last show results
-            sendSocialForm(currentUser);
+            askSerious(currentUser);
         }
         else quizController.askNext(currentUser); //else go next
     }
@@ -121,16 +150,15 @@ public class  AnswerHandler {
         quizController.startQuiz(currentUser);
     }
 
-    private void sendSocialForm(TelegramUser currentUser){
-        dbManager.nextPhase(currentUser.getBotState());
-        output.askGoogleForm(currentUser);
-        dbManager.saveUser(currentUser);
-    }
-
-    private void sendResults(String message, TelegramUser currentUser){
-        if (!message.equals(Util.RESULTS.getText())) return;
+    private void sendResults(TelegramUser currentUser){
         dbManager.nextPhase(currentUser.getBotState());
         quizController.showResults(currentUser);
+    }
+
+    private void askSerious(TelegramUser currentUser){
+        dbManager.nextPhase(currentUser.getBotState());
+        output.askSerious(currentUser);
+
     }
 
 }
