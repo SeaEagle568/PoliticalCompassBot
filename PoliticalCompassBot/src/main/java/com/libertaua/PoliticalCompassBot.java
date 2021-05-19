@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * Main spring boot application.
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.Bean;
  * @author seaeagle
  */
 @SpringBootApplication
+@EnableAsync
 public class PoliticalCompassBot {
     public static void main(String[] args) {
         SpringApplication.run(PoliticalCompassBot.class, args);

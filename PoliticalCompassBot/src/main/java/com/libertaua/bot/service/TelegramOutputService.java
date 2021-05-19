@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
@@ -90,7 +91,7 @@ public class TelegramOutputService {
      */
     public void sendResults(String chatId, Pair<File, Integer> image, String results, String AdMessage) {
 
-        sendImage(chatId, image.first);
+        sendImage(chatId, image.first, false);
         switch (image.second) {
             case 0 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат крайній праволіберал. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>капіталібертарій</b>", chatId, resultsKeyboard());
             case 1 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат крайній ліволіберал. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>анкомрад</b>", chatId, resultsKeyboard());
@@ -131,9 +132,26 @@ public class TelegramOutputService {
     }
 
 
-    private void sendImage(String chatId, File image){
+    public void sendImage(String chatId, File image, boolean asFile){
+        if (asFile){
+            sendFile(chatId, image);
+            return;
+        }
         SendPhoto photo = new SendPhoto();
         photo.setPhoto(new InputFile(image));
+        photo.setChatId(chatId);
+        photo.setReplyMarkup(resultsKeyboard());
+        try {
+            bot.execute(photo);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+        assert (image.delete());
+    }
+
+    private void sendFile(String chatId, File image){
+        SendDocument photo = new SendDocument();
+        photo.setDocument(new InputFile(image));
         photo.setChatId(chatId);
         photo.setReplyMarkup(resultsKeyboard());
         try {

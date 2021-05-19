@@ -6,6 +6,7 @@ import com.libertaua.bot.persistence.DBManager;
 import com.libertaua.bot.service.TelegramOutputService;
 import com.libertaua.bot.util.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -22,6 +23,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author seaeagle
  */
 @Service
+@Async
 public class MainController {
 
     private AnswerHandler answerHandler;
@@ -101,7 +103,7 @@ public class MainController {
             dbManager.saveUser(user);
             return user;
         }
-        BotState state = new BotState(message, null, utils.questionList.get(0));
+        BotState state = new BotState(message, null, utils.questionList.get(0), 0);
         user = new TelegramUser(
                 name,
                 username,

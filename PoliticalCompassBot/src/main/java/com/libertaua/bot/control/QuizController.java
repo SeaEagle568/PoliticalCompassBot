@@ -7,6 +7,7 @@ import com.libertaua.bot.persistence.DBManager;
 import com.libertaua.bot.service.TelegramOutputService;
 import com.libertaua.bot.util.CommonUtils;
 import com.libertaua.bot.util.Ideology;
+import com.libertaua.bot.util.ImageUtils;
 import com.libertaua.bot.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,12 @@ public class QuizController {
     private TelegramOutputService output;
     private DBManager dbManager;
     private CommonUtils utils;
+    private ImageUtils imageUtils;
 
+    @Autowired
+    public void setImageUtils(ImageUtils imageUtils) {
+        this.imageUtils = imageUtils;
+    }
     @Autowired
     public void setUtils(CommonUtils utils) { this.utils = utils; }
     @Autowired
@@ -108,7 +114,7 @@ public class QuizController {
         );
         updateResults(currentUser, finalResults);
         output.sendResults(currentUser.getChatId(),
-                utils.getResultsImage(utils.getUserPic(currentUser), finalResults, allZeros),
+                imageUtils.getResultsImage(imageUtils.getUserPic(currentUser), finalResults, allZeros),
                 textResults(),
                 "Такі координати визначив компас. Куди рухатись далі — обираєте ви.");
 
@@ -116,7 +122,21 @@ public class QuizController {
     }
     public void showIdeologies(TelegramUser currentUser) {
         output.printMessage(currentUser.getChatId(), getIdeologies(utils.resultsToPair(currentUser.getResult())));
+        output.sendImage(currentUser.getChatId(), imageUtils.ideologies_pic, true);
         dbManager.saveUser(currentUser);
+    }
+
+    public void sendNextMeme(TelegramUser currentUser) {
+        Long currentMeme = currentUser.getBotState().getLastMeme();
+        if (currentMeme == null) currentMeme = 0L;
+        if (currentMeme >= imageUtils.memes.size()) {
+            output.printMessage(currentUser.getChatId(), "Вітаю! Ви продивились всі меми які в нас тільки були. Ви або справді любите меми з різнокольровими квадратиками або мавпа.");
+        }
+        output.sendImage(currentUser.getChatId(), imageUtils.memes.get(Math.toIntExact(currentMeme)), currentMeme == imageUtils.memes.size() - 1);
+        currentMeme++;
+        currentUser.getBotState().setLastMeme(currentMeme);
+        dbManager.saveUser(currentUser);
+
     }
 
 

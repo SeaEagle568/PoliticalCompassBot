@@ -60,15 +60,20 @@ public class BotState {
     @Getter @Setter
     private String lastAnswer;
 
+    @Column(name="last_meme")
+    @Getter @Setter
+    private Long lastMeme;
+
     @OneToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @Getter @Setter
     private TelegramUser user;
 
-    public BotState(String lastAnswer, TelegramUser user, Question firstQuestion) {
+    public BotState(String lastAnswer, TelegramUser user, Question firstQuestion, long lastMeme) {
         this.lastAnswer = lastAnswer;
         this.user = user;
         this.phase = Phase.PRESTART;
         this.currentQuestion = firstQuestion;
+        this.lastMeme = lastMeme;
     }
 }

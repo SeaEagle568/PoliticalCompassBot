@@ -72,7 +72,20 @@ public class  AnswerHandler {
         }
         if (button.equals(Util.RESTART)){
             restartTest(currentUser);
+            return;
         }
+        if (button.equals(Util.MEMES) || button.equals(Util.MEMES2)){
+            quizController.sendNextMeme(currentUser);
+            return;
+        }
+        if (button.equals(Util.CHAT)){
+            output.printMessage(currentUser.getChatId(), "https://t.me/joinchat/UsgLOMLbkyvE8Lve");
+            return;
+        }
+        if (button.equals(Util.WOMAN)){
+
+        }
+
     }
 
     private void handleLastAnswer(String message, TelegramUser currentUser) {
