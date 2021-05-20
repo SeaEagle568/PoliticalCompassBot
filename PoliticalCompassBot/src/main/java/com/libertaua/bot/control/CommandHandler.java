@@ -21,7 +21,12 @@ public class CommandHandler {
 
     private DBManager dbManager;
     private TelegramOutputService output;
+    private QuizController quizController;
 
+    @Autowired
+    public void setQuizController(QuizController quizController) {
+        this.quizController = quizController;
+    }
     @Autowired
     public void setDbManager(DBManager dbManager) {
         this.dbManager = dbManager;
@@ -50,8 +55,7 @@ public class CommandHandler {
     private void startGreeting(TelegramUser currentUser) {
         currentUser.getBotState().setPhase(Phase.PRESTART);
         dbManager.saveUser(currentUser);
-        output.printGreeting(currentUser.getChatId());
-        dbManager.nextPhase(currentUser.getBotState());
+        quizController.restartTest(currentUser);
     }
 
     private boolean isStartCommand(String message) {

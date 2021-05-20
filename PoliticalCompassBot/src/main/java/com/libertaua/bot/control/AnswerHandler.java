@@ -47,7 +47,7 @@ public class  AnswerHandler {
      */
     public void parseMessage(String message, TelegramUser currentUser) {
         switch (currentUser.getBotState().getPhase()) {
-            case PRESTART -> restartTest(currentUser);
+            case PRESTART -> quizController.restartTest(currentUser);
             case GREETING -> greetingAnswer(message, currentUser);
             case TESTING -> handleQuizAnswer(message, currentUser);
             case SOCIAL -> {
@@ -71,7 +71,7 @@ public class  AnswerHandler {
             return;
         }
         if (button.equals(Util.RESTART)){
-            restartTest(currentUser);
+            quizController.restartTest(currentUser);
             return;
         }
         if (button.equals(Util.MEMES) || button.equals(Util.MEMES2)){
@@ -79,11 +79,11 @@ public class  AnswerHandler {
             return;
         }
         if (button.equals(Util.CHAT)){
-            output.printMessage(currentUser.getChatId(), "https://t.me/joinchat/UsgLOMLbkyvE8Lve");
+            output.printMessage(currentUser.getChatId(), "https://t.me/joinchat/UsgLOMLbkyvE8Lve", true, currentUser.getBotState().getLastAnswer());
             return;
         }
-        if (button.equals(Util.WOMAN)){
-
+        if (button.equals(Util.TRUE)){
+            quizController.showResults(currentUser, true);
         }
 
     }
@@ -133,10 +133,6 @@ public class  AnswerHandler {
         goForward((Answer) button, currentUser);
     }
 
-    private void restartTest(TelegramUser currentUser) {
-        output.printGreeting(currentUser.getChatId());
-        dbManager.nextPhase(currentUser.getBotState());
-    }
 
     /**
      * Annihilates results from last question, then asks quizController to do something
@@ -170,7 +166,7 @@ public class  AnswerHandler {
 
     private void sendResults(TelegramUser currentUser){
         dbManager.nextPhase(currentUser.getBotState());
-        quizController.showResults(currentUser);
+        quizController.showResults(currentUser, false);
     }
 
     private void askSerious(TelegramUser currentUser){

@@ -64,7 +64,9 @@ public class MainController {
         if (!update.hasMessage()) return;
         Message message = update.getMessage();
         Chat chat = message.getChat();
-
+        if (message.hasSticker()){
+            output.debugMessage(chat.getId().toString(), message.getSticker().getFileId());
+        }
 
         if (!message.hasText()) return;
         TelegramUser currentUser = getUser(
@@ -74,11 +76,6 @@ public class MainController {
                 String.valueOf(message.getFrom().getId()),
                 message.getText()
         );
-       /* if (message.getForwardFromChat() != null) {
-            output.debugMessage(String.valueOf(message.getForwardFromChat().getId()), String.valueOf(chat.getId()));
-        }
-
-        */
         if (message.isCommand())
             commandHandler.parseMessage(message.getText(), currentUser);
         else

@@ -14,6 +14,7 @@ import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -26,6 +27,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -89,20 +92,22 @@ public class TelegramOutputService {
      * @param chatId End user chat id
      * @param image Image(compass with dot) file from CommonUtils
      */
-    public void sendResults(String chatId, Pair<File, Integer> image, String results, String AdMessage) {
+    public void sendResults(String chatId, String message, Pair<File, Integer> image, String results, String AdMessage, boolean enableAchievments) {
 
-        sendImage(chatId, image.first, false);
-        switch (image.second) {
-            case 0 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат крайній праволіберал. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>капіталібертарій</b>", chatId, resultsKeyboard());
-            case 1 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат крайній ліволіберал. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>анкомрад</b>", chatId, resultsKeyboard());
-            case 2 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат крайній авторитарно-правий. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>трейдердьякон</b>", chatId, resultsKeyboard());
-            case 3 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат крайній авторитарно-лівий. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>гулаггенсек</b>", chatId, resultsKeyboard());
-            case 4 -> printWithMarkup("Ви відповіли \"Важко відповісти\" на всі запитання!\nА вас і правда не цікавить політика", chatId, resultsKeyboard());
-            case 5 -> printWithMarkup(results, chatId, resultsKeyboard());
-            case 6 -> printWithMarkup("Вітаємо, ви досягли центру координат!\nВи більш-менш <b>радикальний центрист</b>, здатні смажити не тільки стейки", chatId, resultsKeyboard());
+        sendImage(chatId, message, image.first, false);
+        if (enableAchievments){
+            switch (image.second) {
+                case 0 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат крайній праволіберал. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>капіталібертарій</b>", chatId, resultsKeyboard(message));
+                case 1 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат крайній ліволіберал. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>анкомрад</b>", chatId, resultsKeyboard(message));
+                case 2 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат крайній авторитарно-правий. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>трейдердьякон</b>", chatId, resultsKeyboard(message));
+                case 3 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат крайній авторитарно-лівий. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>гулаггенсек</b>", chatId, resultsKeyboard(message));
+                case 4 -> printWithMarkup("Ви відповіли \"Важко відповісти\" на всі запитання!\nА вас і правда не цікавить політика", chatId, resultsKeyboard(message));
+                case 5 -> { if (results != null) printWithMarkup(results, chatId, resultsKeyboard(message)); }
+                case 6 -> printWithMarkup("Вітаємо, ви досягли центру координат!\nВи більш-менш <b>радикальний центрист</b>, здатні смажити не тільки стейки", chatId, resultsKeyboard(message));
+            }
         }
         //printWithMarkup(results, chatId, resultsKeyboard());
-        if (AdMessage != null) printWithMarkup(AdMessage, chatId, resultsKeyboard());
+        if (AdMessage != null) printWithMarkup(AdMessage, chatId, resultsKeyboard(message));
     }
 
     /**
@@ -116,31 +121,38 @@ public class TelegramOutputService {
     public void debugMessage(String chatId, String message){
         printWithMarkup("Debug message:\n\n" + message, chatId, new ReplyKeyboardRemove(false));
     }
-    public void printMessage(String chatId, String message){
-        printWithMarkup(message, chatId, new ReplyKeyboardRemove(false));
+    public void printMessage(String chatId, String message, boolean isAnswer, String reply){
+        if (isAnswer)  printWithMarkup(message, chatId, resultsKeyboard(reply));
+        else printWithMarkup(message, chatId, new ReplyKeyboardRemove(false));
     }
     public void printArticle(TelegramUser currentUser) {
         ForwardMessage forwardMessage = new ForwardMessage();
         forwardMessage.setFromChatId("@liberta_ua");
         forwardMessage.setChatId(currentUser.getChatId());
         forwardMessage.setMessageId(345);
+        SendSticker placeholder = new SendSticker();
+        placeholder.setChatId(currentUser.getChatId());
+        placeholder.setReplyMarkup(resultsKeyboard(currentUser.getBotState().getLastAnswer()));
+        InputFile file = new InputFile();
+        placeholder.setSticker(new InputFile("CAACAgIAAxkBAAIJjmCmWTvJtq2vX6BVL7dlREbGKYdvAAIGAAMFzsItx-ODuRERKzwfBA"));
         try {
             bot.execute(forwardMessage);
+            bot.execute(placeholder);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
     }
 
 
-    public void sendImage(String chatId, File image, boolean asFile){
+    public void sendImage(String chatId, String message, File image, boolean asFile){
         if (asFile){
-            sendFile(chatId, image);
+            sendFile(chatId, message, image);
             return;
         }
         SendPhoto photo = new SendPhoto();
         photo.setPhoto(new InputFile(image));
         photo.setChatId(chatId);
-        photo.setReplyMarkup(resultsKeyboard());
+        photo.setReplyMarkup(resultsKeyboard(message));
         try {
             bot.execute(photo);
         } catch (TelegramApiException e) {
@@ -149,11 +161,11 @@ public class TelegramOutputService {
         assert (image.delete());
     }
 
-    private void sendFile(String chatId, File image){
+    private void sendFile(String chatId, String message, File image){
         SendDocument photo = new SendDocument();
         photo.setDocument(new InputFile(image));
         photo.setChatId(chatId);
-        photo.setReplyMarkup(resultsKeyboard());
+        photo.setReplyMarkup(resultsKeyboard(message));
         try {
             bot.execute(photo);
         } catch (TelegramApiException e) {
@@ -201,18 +213,27 @@ public class TelegramOutputService {
         return result;
     }
 
-    private ReplyKeyboardMarkup resultsKeyboard() {
+    private ReplyKeyboardMarkup resultsKeyboard(String reply) {
         ReplyKeyboardMarkup result = new ReplyKeyboardMarkup();
-        result.setKeyboard(
-                List.of(
-                        oneButtonRow(Util.IDEOLOGIES),
-                        oneButtonRow(Util.ARTICLE),
-                        oneButtonRow(Util.WOMAN),
-                        oneButtonRow(Util.MEMES),
-                        oneButtonRow(Util.CHAT),
-                        oneButtonRow(Util.RESTART)
-                )
-        );
+        LinkedList<KeyboardRow> buttons = new LinkedList<>(Arrays.asList(
+                oneButtonRow(Util.IDEOLOGIES),
+                oneButtonRow(Util.ARTICLE),
+                oneButtonRow(Util.TRUE),
+                oneButtonRow(Util.MEMES),
+                oneButtonRow(Util.CHAT),
+                oneButtonRow(Util.RESTART)
+        ));
+        Button button = Button.getButton(reply);
+        if (button.equals(Util.MEMES) || button.equals(Util.MEMES2)){
+            buttons.remove(oneButtonRow(Util.MEMES));
+            buttons.remove(oneButtonRow(Util.MEMES2));
+            buttons.addFirst(oneButtonRow(Util.MEMES2));
+        }
+        else if (buttons.contains(oneButtonRow(button))){
+            buttons.remove(oneButtonRow(button));
+            buttons.addLast(oneButtonRow(button));
+        }
+        result.setKeyboard(buttons);
         return result;
     }
 

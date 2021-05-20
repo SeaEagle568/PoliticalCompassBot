@@ -104,7 +104,7 @@ public class QuizController {
      * Obviously a method that is responsible for calculating and printing results
      * @param currentUser TelegramUser who sent a message
      */
-    public void showResults(TelegramUser currentUser) {
+    public void showResults(TelegramUser currentUser, Boolean trueCompass) {
         currentUser.setAnswerTime(OffsetDateTime.now());
         Pair<Integer, Integer> results = countResult(currentUser);
         boolean allZeros = checkNormie(currentUser);
@@ -114,15 +114,17 @@ public class QuizController {
         );
         updateResults(currentUser, finalResults);
         output.sendResults(currentUser.getChatId(),
-                imageUtils.getResultsImage(imageUtils.getUserPic(currentUser), finalResults, allZeros),
-                textResults(),
-                "Такі координати визначив компас. Куди рухатись далі — обираєте ви.");
+                currentUser.getBotState().getLastAnswer(),
+                imageUtils.getResultsImage(imageUtils.getUserPic(currentUser), finalResults, allZeros, trueCompass),
+                null,
+                "Такі координати визначив компас. Куди рухатись далі — обираєте ви.",
+                !trueCompass);
 
         dbManager.saveUser(currentUser);
     }
     public void showIdeologies(TelegramUser currentUser) {
-        output.printMessage(currentUser.getChatId(), getIdeologies(utils.resultsToPair(currentUser.getResult())));
-        output.sendImage(currentUser.getChatId(), imageUtils.ideologies_pic, true);
+        output.printMessage(currentUser.getChatId(), getIdeologies(utils.resultsToPair(currentUser.getResult())), false, null);
+        output.sendImage(currentUser.getChatId(), currentUser.getBotState().getLastAnswer(), imageUtils.ideologies_pic, true);
         dbManager.saveUser(currentUser);
     }
 
@@ -130,15 +132,21 @@ public class QuizController {
         Long currentMeme = currentUser.getBotState().getLastMeme();
         if (currentMeme == null) currentMeme = 0L;
         if (currentMeme >= imageUtils.memes.size()) {
-            output.printMessage(currentUser.getChatId(), "Вітаю! Ви продивились всі меми які в нас тільки були. Ви або справді любите меми з різнокольровими квадратиками або мавпа.");
+            output.printMessage(currentUser.getChatId(), "Вітаю! Ви продивились всі меми які в нас тільки були. Ви або справді любите меми з різнокольровими квадратиками або мавпа.", true, currentUser.getBotState().getLastAnswer());
+            return;
         }
-        output.sendImage(currentUser.getChatId(), imageUtils.memes.get(Math.toIntExact(currentMeme)), currentMeme == imageUtils.memes.size() - 1);
+        output.sendImage(currentUser.getChatId(), currentUser.getBotState().getLastAnswer(), imageUtils.memes.get(Math.toIntExact(currentMeme)), currentMeme == imageUtils.memes.size() - 1);
         currentMeme++;
         currentUser.getBotState().setLastMeme(currentMeme);
         dbManager.saveUser(currentUser);
 
     }
 
+    public void restartTest(TelegramUser currentUser) {
+        currentUser.getBotState().setLastMeme(0L);
+        output.printGreeting(currentUser.getChatId());
+        dbManager.nextPhase(currentUser.getBotState());
+    }
 
     private String getAdMessage() {
         return "Сподіваємося, вам спободався наш тест і ви задумалися над деякими фундаментальними питаннями, можливо вперше. Щоб закріпити результат знань подивіться це відео від нашої Ліберті Берегині - це найкраще, що ви знайдете на Ютубі! Зустрінемось в коментарях \uD83D\uDE09  \n" +
