@@ -198,8 +198,8 @@ public class ImageUtils {
         graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         //graphics2D.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         graphics2D.drawImage(finalPic,
-                (int) (centerX + R + Math.round(finalResults.first * multiplier)),
-                (int) (centerY + R + Math.round(finalResults.second * multiplier)),
+                (int) (centerX - R + Math.round(finalResults.first * multiplier)),
+                (int) (centerY - R + Math.round(finalResults.second * multiplier)),
                 null
         );
         graphics2D.dispose();
@@ -213,15 +213,15 @@ public class ImageUtils {
         graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         graphics2D.setColor(Color.BLACK); //Outer circle
         graphics2D.fillOval(
-                (int) (centerX + R + Math.round(finalResults.first * multiplier)),
-                (int) (centerY + R + Math.round(finalResults.second * multiplier)),
+                (int) (centerX - R + Math.round(finalResults.first * multiplier)),
+                (int) (centerY - R + Math.round(finalResults.second * multiplier)),
                 (int) R,
                 (int) R
         );
         graphics2D.setColor(Color.RED); //Inner circle
         graphics2D.fillOval(
-                (int) (centerX + R + Math.round(finalResults.first * multiplier) + (R-r) / 2),
-                (int) (centerY + R + Math.round(finalResults.second * multiplier) + (R-r) / 2),
+                (int) (centerX - R + Math.round(finalResults.first * multiplier) + (R-r) / 2),
+                (int) (centerY - R + Math.round(finalResults.second * multiplier) + (R-r) / 2),
                 (int) r,
                 (int) r
         );
