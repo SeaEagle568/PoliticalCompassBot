@@ -37,6 +37,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.heroku.sdk/heroku-maven-plugin -->
+        <dependency>
+            <groupId>com.heroku.sdk</groupId>
+            <artifactId>heroku-maven-plugin</artifactId>
+            <version>3.0.4</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -100,12 +107,13 @@
             <plugin>
                 <groupId>com.heroku.sdk</groupId>
                 <artifactId>heroku-maven-plugin</artifactId>
-                <version>3.0.3</version>
+                <version>3.0.4</version>
                 <configuration>
                     <appName>political-compass-bot</appName>
                     <processTypes>
                         <worker>java $JAVA_OPTS -cp target/classes:target/dependency/* com.libertaua.PoliticalCompassBot</worker>
                     </processTypes>
+                    <logProgress>true</logProgress>
                 </configuration>
             </plugin>
             <plugin>
