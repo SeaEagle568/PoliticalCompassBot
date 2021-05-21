@@ -92,22 +92,23 @@ public class TelegramOutputService {
      * @param chatId End user chat id
      * @param image Image(compass with dot) file from CommonUtils
      */
-    public void sendResults(String chatId, String message, Pair<File, Integer> image, String results, String AdMessage, boolean enableAchievments) {
-
-        sendImage(chatId, message, image.first, false);
-        if (enableAchievments){
-            switch (image.second) {
+    public void sendAchievments(String chatId, Pair<File, Integer> image) {
+        if (image == null) return;
+        String message = "";
+        sendImage(chatId, "", image.first, false);
+        switch (image.second) {
                 case 0 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат крайній праволіберал. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>капіталібертарій</b>", chatId, resultsKeyboard(message));
                 case 1 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат крайній ліволіберал. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>анкомрад</b>", chatId, resultsKeyboard(message));
                 case 2 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат крайній авторитарно-правий. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>трейдердьякон</b>", chatId, resultsKeyboard(message));
                 case 3 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат крайній авторитарно-лівий. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>гулаггенсек</b>", chatId, resultsKeyboard(message));
                 case 4 -> printWithMarkup("Ви відповіли \"Важко відповісти\" на всі запитання!\nА вас і правда не цікавить політика", chatId, resultsKeyboard(message));
-                case 5 -> { if (results != null) printWithMarkup(results, chatId, resultsKeyboard(message)); }
-                case 6 -> printWithMarkup("Вітаємо, ви досягли центру координат!\nВи більш-менш <b>радикальний центрист</b>, здатні смажити не тільки стейки", chatId, resultsKeyboard(message));
-            }
+                case 5 -> printWithMarkup("Вітаємо, ви досягли центру координат!\nВи більш-менш <b>радикальний центрист</b>, здатні смажити не тільки стейки", chatId, resultsKeyboard(message));
         }
-        //printWithMarkup(results, chatId, resultsKeyboard());
-        if (AdMessage != null) printWithMarkup(AdMessage, chatId, resultsKeyboard(message));
+    }
+
+    public void sendCompass(String chatId, File image, String text){
+        sendImage(chatId, "", image, false);
+        if (text != null) printWithMarkup(text, chatId, resultsKeyboard(""));
     }
 
     /**

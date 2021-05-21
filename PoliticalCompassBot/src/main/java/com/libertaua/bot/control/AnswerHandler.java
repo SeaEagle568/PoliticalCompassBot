@@ -52,7 +52,6 @@ public class  AnswerHandler {
             case TESTING -> handleQuizAnswer(message, currentUser);
             case SOCIAL -> {
                 handleLastAnswer(message, currentUser);
-                sendResults(currentUser);
             }
             case RESULTS -> handleResultsAnswer(message, currentUser);
         }
@@ -103,6 +102,7 @@ public class  AnswerHandler {
         //Else add results
         assert button instanceof Answer;
         currentUser.setSeriously(((Answer) button).name());
+        sendResults(currentUser);
     }
 
     private void greetingAnswer(String message, TelegramUser currentUser) {
