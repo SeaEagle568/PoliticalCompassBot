@@ -51,6 +51,10 @@ public class ImageUtils {
         this.bot = bot;
     }
 
+    /**
+     * Initialization - loading images from disc
+     *
+     */
     @PostConstruct
     public void init(){
         ideologies_pic = new File("target/classes/ideologies.png");
@@ -88,6 +92,12 @@ public class ImageUtils {
                 .getSubimage(0, 0, bi.getWidth(), bi.getHeight());
     }
 
+    /**
+     * Method that returns a pair of Achievement image and its ID or null if no achievement
+     * @param finalResults pair of doubles - standart results (0-100)
+     * @param allZeros boolean if all answers were 0
+     * @return ordered pair of Image file and ID
+     */
     public Pair<File, Integer> getAchievment(Pair<Double, Double> finalResults, boolean allZeros){
         BufferedImage achievment = null;
         Integer resultType = null;
@@ -174,6 +184,14 @@ public class ImageUtils {
         }
         return tempFile;
     }
+
+    /**
+     * Rotate coordinates by multiplication on rotation matrix
+     *
+     * @param input pair of doubles in format [-50, 50]
+     * @param degree degree (not radians)
+     * @return pair of transformed results
+     */
     private static Pair<Double, Double> rotateCoords(Pair<Double, Double> input, double degree){
         Pair<Double, Double> result = new Pair<>(0d,0d);
         input.second = -input.second;
@@ -184,6 +202,7 @@ public class ImageUtils {
         result.second = -result.second;
         return result;
     }
+
     private BufferedImage resizeImage(BufferedImage originalImage, double targetWidth, double targetHeight) {
         BufferedImage resizedImage = new BufferedImage((int)Math.round(targetWidth), (int)Math.round(targetHeight), BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics2D = resizedImage.createGraphics();
@@ -194,6 +213,11 @@ public class ImageUtils {
         return resizedImage;
     }
 
+    /**
+     * Crop image to circle
+     * @param original original image
+     * @return new image
+     */
     private BufferedImage getCircle(BufferedImage original){
         int width = original.getWidth();
         BufferedImage circleBuffer = new BufferedImage(width, width, BufferedImage.TYPE_INT_ARGB);
@@ -204,6 +228,17 @@ public class ImageUtils {
         return circleBuffer;
     }
 
+    /**
+     * Returns new compass with userpic
+     * @param userPic userpic image
+     * @param compass blank compass image
+     * @param finalResults results on compass
+     * @param centerX center of compass X
+     * @param centerY center of compass Y
+     * @param R radius of resulting circle
+     * @param multiplier multiplier for coordinates to fit compass
+     * @return resulting image
+     */
     private BufferedImage getCompassWithPic(BufferedImage userPic, BufferedImage compass, Pair<Double, Double> finalResults, double centerX, double centerY, double R, double multiplier) {
         BufferedImage finalPic = resizeImage(getCircle(userPic),R, R);
         Graphics2D graphics2D = compass.createGraphics();
@@ -219,6 +254,18 @@ public class ImageUtils {
         return compass;
     }
 
+    /**
+     * Creates new compass with black/red dot
+     *
+     * @param compass blank compass image
+     * @param finalResults results on compass
+     * @param centerX center of compass X
+     * @param centerY center of compass Y
+     * @param R radius of outer circle (black)
+     * @param r radius of inner circle (red)
+     * @param multiplier multiplier for coordinates to fit compass
+     * @return resulting image
+     */
     private BufferedImage getCompassWithDot(BufferedImage compass, Pair<Double, Double> finalResults, double centerX, double centerY, double R, double r, double multiplier)
     {
         Graphics2D graphics2D = compass.createGraphics();
@@ -242,6 +289,11 @@ public class ImageUtils {
         return compass;
     }
 
+    /**
+     * Gets userpic from telegram user
+     * @param currentUser TelegramUser
+     * @return image of userpic
+     */
     public BufferedImage getUserPic(TelegramUser currentUser) {
         GetUserProfilePhotos getUserProfilePhotos = new GetUserProfilePhotos(Long.parseLong(currentUser.getUserId()), 0, 1);
         try {

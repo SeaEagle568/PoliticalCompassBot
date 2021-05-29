@@ -6,7 +6,6 @@ import com.libertaua.bot.persistence.DBManager;
 import com.libertaua.bot.service.TelegramOutputService;
 import com.libertaua.bot.util.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -23,7 +22,6 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author seaeagle
  */
 @Service
-@Async
 public class MainController {
 
     private AnswerHandler answerHandler;
@@ -63,10 +61,12 @@ public class MainController {
     public void razgrebiUpdate(Update update) {
         if (!update.hasMessage()) return;
         Message message = update.getMessage();
+        if (message.isGroupMessage() || message.isChannelMessage() || message.isSuperGroupMessage()) return;
         Chat chat = message.getChat();
         if (message.hasSticker()){
             output.debugMessage(chat.getId().toString(), message.getSticker().getFileId());
         }
+
 
         if (!message.hasText()) return;
         TelegramUser currentUser = getUser(

@@ -3,6 +3,7 @@ package com.libertaua.bot.control;
 import com.libertaua.bot.entities.Question;
 import com.libertaua.bot.entities.TelegramUser;
 import com.libertaua.bot.enums.Axe;
+import com.libertaua.bot.enums.Phase;
 import com.libertaua.bot.persistence.DBManager;
 import com.libertaua.bot.service.TelegramOutputService;
 import com.libertaua.bot.util.CommonUtils;
@@ -123,6 +124,11 @@ public class QuizController {
 
         dbManager.saveUser(currentUser);
     }
+
+    /**
+     * Responsible for sending all messages when Ideologies button clicked
+     * @param currentUser Telegram user
+     */
     public void showIdeologies(TelegramUser currentUser) {
         output.printMessage(currentUser.getChatId(),
                 getIdeologies(utils.resultsToPair(currentUser.getResult())),
@@ -137,6 +143,10 @@ public class QuizController {
         dbManager.saveUser(currentUser);
     }
 
+    /**
+     * Sends next meme according to DB field
+     * @param currentUser TelegramUser
+     */
     public void sendNextMeme(TelegramUser currentUser) {
         Long currentMeme = currentUser.getBotState().getLastMeme();
         if (currentMeme == null) currentMeme = 0L;
@@ -153,10 +163,15 @@ public class QuizController {
 
     }
 
+    /**
+     * Restarts test to the greeting point
+     * @param currentUser needed TelegramUser
+     */
     public void restartTest(TelegramUser currentUser) {
         //currentUser.getBotState().setLastMeme(0L);
         output.printGreeting(currentUser.getChatId());
-        dbManager.nextPhase(currentUser.getBotState());
+        currentUser.getBotState().setPhase(Phase.GREETING);
+        dbManager.saveUser(currentUser);
     }
 
     private String getAdMessage() {
@@ -180,6 +195,11 @@ public class QuizController {
         return text.toString();
     }
 
+    /**
+     * Get string with closest ideologies based on results
+     * @param results pair of doubles in format (0, 100)
+     * @return
+     */
     private String getIdeologies(Pair<Double, Double> results){
         ArrayList<Ideology> ideologies = utils.getNearestDots(results);
         StringBuilder text = new StringBuilder("Ось три політичні ідеології які можуть вам підійти:\n\n");
@@ -187,7 +207,7 @@ public class QuizController {
         for (int i = 1; i < ideologies.size()-1; i++){
             text.append("<i>").append(ideologies.get(i).name).append("</i>\n");
         }
-
+        text.append("\n\nбонус: <i>майже точне</i> зображення політичних систем на компасі");
         return text.toString();
     }
 

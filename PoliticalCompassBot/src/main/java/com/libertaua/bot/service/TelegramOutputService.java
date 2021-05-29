@@ -14,7 +14,6 @@ import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -22,6 +21,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRem
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -106,7 +106,13 @@ public class TelegramOutputService {
         }
     }
 
-    public void sendCompass(String chatId, File image, String text){
+    /**
+     * Sends image to user with text if needed
+     * @param chatId chatid of TG user
+     * @param image file with compass
+     * @param text aux text
+     */
+    public void sendCompass(String chatId, File image, @Nullable String text){
         sendImage(chatId, "", image, false);
         if (text != null) printWithMarkup(text, chatId, resultsKeyboard(""));
     }
@@ -119,23 +125,43 @@ public class TelegramOutputService {
         askQuestion("Ви серйозно проходили тест?", currentUser.getChatId(), false);
     }
 
+    /**
+     * Simple method for debugging purposes
+     * @param chatId chatid of user
+     * @param message debug message
+     */
     public void debugMessage(String chatId, String message){
         printWithMarkup("Debug message:\n\n" + message, chatId, new ReplyKeyboardRemove(false));
     }
+
+    /**
+     * Prints message with results markup if %isAnswer% or with same markup else
+     * @param chatId chat id of TG user
+     * @param message message to send
+     * @param isAnswer if new answer replykeyboard needed
+     * @param reply what was last reply
+     */
     public void printMessage(String chatId, String message, boolean isAnswer, String reply){
         if (isAnswer)  printWithMarkup(message, chatId, resultsKeyboard(reply));
         else printWithMarkup(message, chatId, new ReplyKeyboardRemove(false));
     }
+
+    /**
+     * Forwards article from channel
+     * Can also send sticker or message
+     * @param currentUser current TelegramUser
+     */
     public void printArticle(TelegramUser currentUser) {
         ForwardMessage forwardMessage = new ForwardMessage();
         forwardMessage.setFromChatId("@liberta_ua");
         forwardMessage.setChatId(currentUser.getChatId());
         forwardMessage.setMessageId(345);
-        SendSticker placeholder = new SendSticker();
+        SendMessage placeholder = new SendMessage();
         placeholder.setChatId(currentUser.getChatId());
         placeholder.setReplyMarkup(resultsKeyboard(currentUser.getBotState().getLastAnswer()));
-        InputFile file = new InputFile();
-        placeholder.setSticker(new InputFile("CAACAgIAAxkBAAIJjmCmWTvJtq2vX6BVL7dlREbGKYdvAAIGAAMFzsItx-ODuRERKzwfBA"));
+        placeholder.setText("Можете обговорити статтю в нашому чаті, ми відкриті до діалогу!");
+        //InputFile file = new InputFile();
+        //placeholder.setSticker(new InputFile("CAACAgIAAxkBAAIJjmCmWTvJtq2vX6BVL7dlREbGKYdvAAIGAAMFzsItx-ODuRERKzwfBA"));
         try {
             bot.execute(forwardMessage);
             bot.execute(placeholder);
@@ -144,7 +170,13 @@ public class TelegramOutputService {
         }
     }
 
-
+    /**
+     * Sends an image to user
+     * @param chatId chat id of tg user
+     * @param message message with image
+     * @param image image file
+     * @param asFile true if to send as file
+     */
     public void sendImage(String chatId, String message, File image, boolean asFile){
         if (asFile){
             sendFile(chatId, message, image);
@@ -214,6 +246,14 @@ public class TelegramOutputService {
         return result;
     }
 
+    /**
+     * Get new markup based on previous,
+     * shuffles it so that last clicked button goes down
+     * If clicked on memes, get MORE_MEMES on top
+     * Chat after article also goes on top
+     * @param reply Last answer of user
+     * @return needed markup
+     */
     private ReplyKeyboardMarkup resultsKeyboard(String reply) {
         ReplyKeyboardMarkup result = new ReplyKeyboardMarkup();
         LinkedList<KeyboardRow> buttons = new LinkedList<>(Arrays.asList(
@@ -229,6 +269,12 @@ public class TelegramOutputService {
             buttons.remove(oneButtonRow(Util.MEMES));
             buttons.remove(oneButtonRow(Util.MEMES2));
             buttons.addFirst(oneButtonRow(Util.MEMES2));
+        }
+        else if (button.equals(Util.ARTICLE)){
+            buttons.remove(oneButtonRow(Util.CHAT));
+            buttons.remove(oneButtonRow(Util.ARTICLE));
+            buttons.addFirst(oneButtonRow(Util.CHAT));
+            buttons.addLast(oneButtonRow(Util.ARTICLE));
         }
         else if (buttons.contains(oneButtonRow(button))){
             buttons.remove(oneButtonRow(button));

@@ -78,7 +78,7 @@ public class  AnswerHandler {
             return;
         }
         if (button.equals(Util.CHAT)){
-            output.printMessage(currentUser.getChatId(), "https://t.me/joinchat/UsgLOMLbkyvE8Lve", true, currentUser.getBotState().getLastAnswer());
+            output.printMessage(currentUser.getChatId(), "питання, пропозиції, постіронія\n\nhttps://t.me/joinchat/UsgLOMLbkyvE8Lve", true, currentUser.getBotState().getLastAnswer());
             return;
         }
         if (button.equals(Util.TRUE)){

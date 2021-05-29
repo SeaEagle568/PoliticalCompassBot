@@ -14,6 +14,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A piece of human metabolic output
@@ -77,7 +79,7 @@ public class CommonUtils {
     /**
      * Spring post-construct method that loads all resources and constants
      * DO NOT call manually
-     * I avoided just making a static class because Sanya Balashov said it is anti-pattern and i trusted
+     * I avoided just making a static class because Sanya Balashov said it is anti-pattern and i trusted him
      */
     @PostConstruct
     public void initializeUtils(){
@@ -100,6 +102,7 @@ public class CommonUtils {
         dbManager.saveQuestions(questionList); //updating db with questions
 
         LAST_QUESTION = (long) questionList.size();
+        Logger.getLogger("Initializer").log(Level.INFO, "Loaded " + LAST_QUESTION + " questions, uploaded to DB");
         for (Question question : questionList){
             if (question.getAxe() == Axe.POLITICAL) MAX_SCORE_POLI += 2;
             else MAX_SCORE_ECON += 2;
