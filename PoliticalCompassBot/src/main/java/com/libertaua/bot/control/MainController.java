@@ -3,6 +3,7 @@ package com.libertaua.bot.control;
 import com.libertaua.bot.entities.BotState;
 import com.libertaua.bot.entities.TelegramUser;
 import com.libertaua.bot.persistence.DBManager;
+import com.libertaua.bot.service.BroadcastService;
 import com.libertaua.bot.service.TelegramOutputService;
 import com.libertaua.bot.util.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,12 @@ public class MainController {
     private DBManager dbManager;
     private CommonUtils utils;
     private TelegramOutputService output;
+    private BroadcastService broadcastService;
 
+    @Autowired
+    public void setBroadcastService(BroadcastService broadcastService) {
+        this.broadcastService = broadcastService;
+    }
     @Autowired
     public void setOutput(TelegramOutputService output) {
         this.output = output;
@@ -63,12 +69,11 @@ public class MainController {
         Message message = update.getMessage();
         if (message.isGroupMessage() || message.isChannelMessage() || message.isSuperGroupMessage()) return;
         Chat chat = message.getChat();
+        /*
         if (message.hasSticker()){
             output.debugMessage(chat.getId().toString(), message.getSticker().getFileId());
         }
-
-
-        if (!message.hasText()) return;
+        */
         TelegramUser currentUser = getUser(
                 chat.getFirstName() + " " + chat.getLastName(),
                 chat.getUserName(),
@@ -76,6 +81,13 @@ public class MainController {
                 String.valueOf(message.getFrom().getId()),
                 message.getText()
         );
+
+        if (Boolean.TRUE.equals(currentUser.getBroadcasting())) {
+            broadcastService.broadcast(currentUser, message);
+            return;
+        }
+        if (!message.hasText()) return;
+
         if (message.isCommand())
             commandHandler.parseMessage(message.getText(), currentUser);
         else
@@ -95,7 +107,7 @@ public class MainController {
         TelegramUser user;
         if (dbManager.userExists(chatId)) {
             user = dbManager.userByChatId(chatId);
-            user.getBotState().setLastAnswer(message);
+            if (message != null) user.getBotState().setLastAnswer(message);
             user.setUserId(userId);
             dbManager.saveUser(user);
             return user;

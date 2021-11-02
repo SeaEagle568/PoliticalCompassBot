@@ -10,11 +10,13 @@ import com.libertaua.bot.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.CopyMessage;
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
@@ -74,6 +76,16 @@ public class TelegramOutputService {
 
     }
 
+
+    public void copyMessage(String chatIdFrom, String chatIdTo, Message message) throws TelegramApiException {
+        ForwardMessage copyMessage = ForwardMessage.builder()
+                .chatId(chatIdTo)
+                .fromChatId(chatIdFrom)
+                .messageId(message.getMessageId())
+                .build();
+        bot.execute(copyMessage);
+    }
+
     /**
      * A method that prints some text that is supposed to be Quiz question to user
      * Uses answer keyboard markup
@@ -97,10 +109,10 @@ public class TelegramOutputService {
         String message = "";
         sendImage(chatId, "", image.first, false);
         switch (image.second) {
-                case 0 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат крайній праволіберал. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>капіталібертарій</b>", chatId, resultsKeyboard(message));
-                case 1 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат крайній ліволіберал. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>анкомрад</b>", chatId, resultsKeyboard(message));
-                case 2 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат крайній авторитарно-правий. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>трейдердьякон</b>", chatId, resultsKeyboard(message));
-                case 3 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат крайній авторитарно-лівий. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>гулаггенсек</b>", chatId, resultsKeyboard(message));
+                case 0 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат: крайній праволіберал. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>капіталібертарій</b>", chatId, resultsKeyboard(message));
+                case 1 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат: крайній ліволіберал. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>анкомрад</b>", chatId, resultsKeyboard(message));
+                case 2 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат: крайній авторитарно-правий. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>трейдердьякон</b>", chatId, resultsKeyboard(message));
+                case 3 -> printWithMarkup("Вітаємо, ви досягли меж квадранту!\nВаш результат: крайній авторитарно-лівий. Серйозно обирали, чи заради мємів, але <i>ачівка</i> є: <b>гулаггенсек</b>", chatId, resultsKeyboard(message));
                 case 4 -> printWithMarkup("Ви відповіли \"Важко відповісти\" на всі запитання!\nА вас і правда не цікавить політика", chatId, resultsKeyboard(message));
                 case 5 -> printWithMarkup("Вітаємо, ви досягли центру координат!\nВи більш-менш <b>радикальний центрист</b>, здатні смажити не тільки стейки", chatId, resultsKeyboard(message));
         }
@@ -221,9 +233,7 @@ public class TelegramOutputService {
         message.setParseMode("HTML");
         try {
             bot.execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
+        } catch (TelegramApiException ignored) {}
     }
 
     private ReplyKeyboardMarkup startQuizMarkup() {
@@ -327,6 +337,5 @@ public class TelegramOutputService {
         result.add(button.getText());
         return result;
     }
-
 
 }

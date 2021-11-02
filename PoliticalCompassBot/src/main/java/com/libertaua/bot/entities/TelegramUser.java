@@ -126,6 +126,14 @@ public class TelegramUser {
     @Getter @Setter
     private OffsetDateTime answerTime;
 
+    @Column(name="permissions")
+    @Getter @Setter
+    private Long permissions;
+
+    @Column(name = "broadcasting")
+    @Getter @Setter
+    private Boolean broadcasting;
+
     //If only Lombok had @SomeArgsConstructor......
     public TelegramUser(String name,
                         String username,

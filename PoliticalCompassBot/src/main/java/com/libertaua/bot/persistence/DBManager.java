@@ -50,6 +50,9 @@ public class DBManager {
     public void saveState(BotState state){
         botStateRepository.save(state);
     }
+    public List<String> getAllChatIds() {
+        return userRepository.findAllChatID();
+    }
 
     /**
      * Method forwarding user up to the next stage
