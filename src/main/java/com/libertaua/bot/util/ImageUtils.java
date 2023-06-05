@@ -3,6 +3,7 @@ package com.libertaua.bot.util;
 import com.libertaua.bot.Bot;
 import com.libertaua.bot.entities.TelegramUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.GetUserProfilePhotos;
@@ -18,6 +19,9 @@ import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -47,6 +51,7 @@ public class ImageUtils {
 
     private Bot bot;
     @Autowired
+    @Lazy
     public void setBot(Bot bot) {
         this.bot = bot;
     }
@@ -56,27 +61,35 @@ public class ImageUtils {
      *
      */
     @PostConstruct
-    public void init(){
-        ideologies_pic = new File("target/classes/ideologies.png");
-        File memesFolder = new File("target/classes/memes");
+    public void init() {
+        ideologies_pic = getResource("ideologies.png");
+        File memesFolder = getResource("memes");
         for (final File fileEntry : Objects.requireNonNull(memesFolder.listFiles())) {
             if (!fileEntry.isDirectory()) memes.add(fileEntry);
         }
         memes.sort(Comparator.comparing(File::getName));
 
         try {
-            compass = ImageIO.read(new File("target/classes/compass.png"));
-            true_compass = ImageIO.read(new File("target/classes/true.jpg"));
-            achievments[0] = ImageIO.read(new File("target/classes/ancap.jpg"));
-            achievments[1] = ImageIO.read(new File("target/classes/ancom.jpg"));
-            achievments[2] = ImageIO.read(new File("target/classes/authright.jpg"));
-            achievments[3] = ImageIO.read(new File("target/classes/tankie.jpg"));
-            achievments[4] = ImageIO.read(new File("target/classes/normie.jpg"));
-            achievments[5] = ImageIO.read(new File("target/classes/gigachad.png"));
+            compass = ImageIO.read(getResource("compass.png"));
+            true_compass = ImageIO.read(getResource("true.jpg"));
+            achievments[0] = ImageIO.read(getResource("ancap.jpg"));
+            achievments[1] = ImageIO.read(getResource("ancom.jpg"));
+            achievments[2] = ImageIO.read(getResource("authright.jpg"));
+            achievments[3] = ImageIO.read(getResource("tankie.jpg"));
+            achievments[4] = ImageIO.read(getResource("normie.jpg"));
+            achievments[5] = ImageIO.read(getResource("gigachad.png"));
         } catch (IOException e) {
             String error = "Error uploading image";
             System.err.println(error);
             e.printStackTrace();
+        }
+    }
+
+    private File getResource(String name) {
+        try {
+            return new File(ImageUtils.class.getClassLoader().getResource(name).toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
     }
     /**

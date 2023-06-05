@@ -9,8 +9,9 @@ import com.libertaua.bot.util.CommonUtils;
 import com.libertaua.bot.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.CopyMessage;
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -23,7 +24,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRem
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -54,6 +54,7 @@ public class TelegramOutputService {
         this.utils = utils;
     }
     @Autowired
+    @Lazy
     public void setBot(Bot bot) {
         this.bot = bot;
     }

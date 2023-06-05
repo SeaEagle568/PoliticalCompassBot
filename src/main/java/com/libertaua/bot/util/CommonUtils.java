@@ -10,8 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.logging.Level;
@@ -34,11 +36,11 @@ public class CommonUtils {
     public int MAX_SCORE_ECON = 0;
     public int MAX_SCORE_POLI = 0;
 
-    private String questionsFile = "target/classes/questions.json";
-    private String ideologiesFile = "target/classes/ideologies.json";
+    private String questionsFile = getResource("questions.json").getPath();
+    private String ideologiesFile = getResource("ideologies.json").getPath();
 
     @Getter
-    private String greetingFile = "target/classes/greeting.txt";
+    private String greetingFile = getResource("greeting.txt").getPath();
     @Getter
     private String devChatId = "@seaeagle_dt";
 
@@ -57,6 +59,15 @@ public class CommonUtils {
     @Autowired
     public void setDbManager(DBManager dbManager) {
         this.dbManager = dbManager;
+    }
+
+
+    private File getResource(String name) {
+        try {
+            return new File(CommonUtils.class.getClassLoader().getResource(name).toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
